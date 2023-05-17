@@ -23,7 +23,7 @@ async def get_quote(channel):
     # Get quote while time is between 9:30 and 4:00
     while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
         try:
-            await channel.send(td.get_stock_quote())
+            await channel.send(td.get_stock_quotes())
             await asyncio.sleep(60) # 1 minute
         except Exception as e:
             print("Error getting quote: ")
@@ -74,8 +74,8 @@ def run_discord_bot():
         if user_message[0] == trigger:
             user_message = user_message[1:]
             await send_message(message, user_message, False, trigger)
-        elif user_message == "help":
-            await message.channel.send("Trigger is '" + trigger + "'" )
+        elif isinstance(message.channel, discord.channel.DMChannel):
+            await message.channel.send("ChatGPT support in progress..." )
           
         # use ! to send private messages to user  
         # if user_message[0] == '!':

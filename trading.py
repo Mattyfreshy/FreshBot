@@ -10,8 +10,13 @@ TODAY = dt.date.today()
 NOW = dt.datetime.now()
 WEEK_START = TODAY - dt.timedelta(days=TODAY.weekday())
 
-# Returns stock data
-def get_stock_quote():
+# Get quote of single stock
+def get_quote(tick):
+    stock = yf.Ticker(tick)
+    return stock.info['symbol'] + ": " + str(stock.info['currentPrice']) + " " + str(stock.info['currency'])
+
+# Returns stock data of all tickers
+def get_stock_quotes():
     ticks = []
     stock_infos = []
     summary = []
