@@ -1,5 +1,6 @@
-import discord, responses
 import os
+import discord
+import responses
 from dotenv import load_dotenv
 
 # Sends message from responses.py based on user message
@@ -12,6 +13,11 @@ async def send_message(message, user_message, is_private, trigger):
 
 # Run discord bot
 def run_discord_bot():
+    # Init variables
+    trigger = '!'
+    stock_ID = client.get_channel(os.getenv('CHANNEL_ID'))
+
+    # Init discord client
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
@@ -35,7 +41,6 @@ def run_discord_bot():
         print(f"{username} said: '{user_message}' ({channel})")
         
         # If special character used, trigger bot response
-        trigger = '!'
         if user_message[0] == trigger:
             user_message = user_message[1:]
             await send_message(message, user_message, False, trigger)
