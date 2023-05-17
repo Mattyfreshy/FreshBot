@@ -1,7 +1,9 @@
-import os
-import discord
-import responses
+import os, discord, responses, asyncio
 from dotenv import load_dotenv
+
+# Other modules imports
+import trading as td
+import datetime as dt
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -11,21 +13,49 @@ async def send_message(message, user_message, is_private, trigger):
     except Exception as e:
         print(e)
 
+# Sends stock quote every minute
+async def get_quote(channel):
+    # Start quote
+    print("Getting quote...")
+    print(dt.datetime.now().time())
+    await asyncio.sleep(1)
+
+    # Get quote while time is between 9:30 and 4:00
+    while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
+        try:
+            await channel.send(td.get_stock_quote())
+            await asyncio.sleep(60) # 1 minute
+        except Exception as e:
+            print("Error getting quote: ")
+            print(e)
+            await asyncio.sleep(1)
+        
+    # Stop quote
+    print("Quote stopped")
+    print(dt.datetime.now().time())
+    await asyncio.sleep(1)
+        
 # Run discord bot
 def run_discord_bot():
-    # Init variables
-    trigger = '!'
-    stock_ID = client.get_channel(os.getenv('CHANNEL_ID'))
-
     # Init discord client
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
 
+    # Init/load variables
+    load_dotenv()     
+    trigger = '!'
+
+    # On ready
     @client.event
     async def on_ready():
+        # Client Running
         print(f'{client.user} is now running!')
-        
+
+        # Get quote
+        await get_quote(client.get_channel(int(os.getenv('CHANNEL_ID'))))
+
+    # On message
     @client.event
     async def on_message(message):
         # prevent bot from responding to itself
@@ -53,8 +83,8 @@ def run_discord_bot():
         #     await send_message(message, user_message, is_private=True)
         # else:
         #     await send_message(message, user_message, is_private=False)
-    
-    load_dotenv()     
+
+    # Run bot
     client.run(os.getenv('DISCORD_TOKEN'))
     
     
