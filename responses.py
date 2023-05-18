@@ -29,7 +29,9 @@ async def handle_responses(message: discord.Message, trigger) -> str:
         try:
             if message.author.guild_permissions.administrator:
                 await message.channel.purge(limit=int(args[0]) + 1)
-            return 'Purged ' + str(args[0]) + ' messages' if int(args[0]) <= 100 else 'Max purge is 100 messages'
+                return 'Purged ' + str(args[0]) + ' messages' if int(args[0]) <= 100 else 'Max purge is 100 messages'
+            else:
+                return 'Purge failed: user does not have admin permissions'
         except Exception as e:
             print(e)
             return 'Error purging messages'
