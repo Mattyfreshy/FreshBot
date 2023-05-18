@@ -9,7 +9,7 @@ class Inputs(Enum):
     random = "Get a random number [min] [max]]"
     hello = "Howdy"
     quote = "Get [stock] quote: "
-    purge = "Purge [number] messages. (Admin only)"
+    purge = "Purge [number] messages. (Admin only, Use at your own risk)"
     
     
 # Function to handle responses
