@@ -20,15 +20,17 @@ async def get_quote(channel):
     # Variables
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
+    marketStatus = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 20)
 
     # Print and send todays date
-    print(date)
-    await channel.send(spacer)
-    await channel.send("**\* " + date + " \*** ")
-    await channel.send(spacer)
+    if marketStatus:
+        print(date)
+        await channel.send(spacer)
+        await channel.send("**\* " + date + " \*** ")
+        await channel.send(spacer)
 
     # Get quote while time is between 9:30 and 4:00
-    while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
+    while marketStatus:
         try:
             # Get Quote to terminal
             print("\nGetting quote...")
