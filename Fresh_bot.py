@@ -42,7 +42,7 @@ async def get_quote(channel):
             await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
             await channel.send(td.get_stock_quotes())
             await channel.send("------------------")
-            await asyncio.sleep(60 * 15) # 1 * 15 minutes
+            await asyncio.sleep(60 * 1) # 1 * 15 minutes
 
         except Exception as e:
             print("Error getting quote: ")
