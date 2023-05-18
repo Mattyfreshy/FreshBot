@@ -22,6 +22,7 @@ async def get_quote(channel):
             print("Getting quote..`.")
             print(dt.datetime.now().time())
             await asyncio.sleep(1)
+            await channel.send(dt.datetime.now().time())
             await channel.send(td.get_stock_quotes())
             await asyncio.sleep(60 * 15) # 1 * 15 minutes
             
