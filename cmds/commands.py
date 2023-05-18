@@ -46,7 +46,7 @@ class Commands(commands.Cog):
             await ctx.send('Error getting quote or quote does not exist')
 
     @commands.command(name='ping')
-    async def ping(ctx: commands.context.Context):
+    async def ping(self, ctx: commands.context.Context):
         await ctx.channel.send("pong")
 
 def setup(bot):
