@@ -16,9 +16,11 @@ async def send_message(message, user_message, is_private, trigger):
 # Sends stock quote every minute
 async def get_quote(channel):
     # Print and send todays date
-    print("Date: " + dt.date.today())
-    await channel.send("Date: " + dt.date.today())
-    
+    print("Date: ")
+    print(dt.date.today())
+    await channel.send("Date: ")
+    await channel.send(dt.date.today())
+
     # Get quote while time is between 9:30 and 4:00
     while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
         try:
