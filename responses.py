@@ -28,7 +28,7 @@ def handle_responses(message, trigger) -> str:
     if command == 'roll':
         return str(random.randint(1,6))   
     
-    if command == 'getQuote':
+    if command == 'getquote':
         try:
             return trading.get_quote(args[0].upper())
         except Exception as e:
