@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import src.FreshBot as fb
+import FreshBot as fb
 import random, trading
 from enum import Enum
 

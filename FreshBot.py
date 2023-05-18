@@ -1,4 +1,4 @@
-import os, discord, responses, asyncio, setup
+import os, discord, responses, asyncio, setup, pathlib
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -11,7 +11,6 @@ load_dotenv()
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=setup.get_prefix, intents=intents)
-EXTENSIONS = ['cmds.commands']
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -67,8 +66,9 @@ def run_discord_bot():
     @bot.event
     async def on_ready():
         # Load extensions
-        for extension in EXTENSIONS:
-            await bot.load_extension(extension)
+        for filename in os.listdir('./cmds'):
+            if filename.endswith('.py'):
+                await bot.load_extension(f'cmds.{filename[:-3]}')
         
         # Bot Running
         print(f'{bot.user} is now running!')

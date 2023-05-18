@@ -1,15 +1,15 @@
 import discord
 from discord.ext import commands
 import random
-import src.trading as td
+import trading as td
 
-class commandsCog(commands.Cog):
+class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Clear messages
     @commands.guild_only()
-    @commands.command()
+    @commands.command(name='clear')
     async def clear(self, ctx, amount=0):
         """ Clear [number] messages not including this message. (Admin only, Use at your own risk) """
         if ctx.author.permissions_in(ctx.channel).administrator:
@@ -48,3 +48,6 @@ class commandsCog(commands.Cog):
     @commands.command(name='ping')
     async def ping(ctx: commands.context.Context):
         await ctx.channel.send("pong")
+
+def setup(bot):
+    bot.add_cog(Commands(bot))
