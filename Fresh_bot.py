@@ -10,7 +10,7 @@ from operator import concat
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
     try:
-        response = responses.handle_responses(user_message, trigger)
+        response = await responses.handle_responses(user_message, trigger)
         await message.author.send(response) if is_private else await message.channel.send(response)
     except Exception as e:
         print(e)
