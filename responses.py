@@ -30,7 +30,7 @@ def handle_responses(message, trigger) -> str:
     
     if command == 'getQuote':
         try:
-            return trading.get_quote(args[0])
+            return trading.get_quote(args[0].upper())
         except Exception as e:
             print(e)
             return 'Error getting quote or quote does not exist'
