@@ -20,7 +20,7 @@ async def get_quote(channel):
     # Variables
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
-    def marketStatus(): dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 26)
+    def marketStatus(): return dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 32)
 
     # Print and send todays date
     if marketStatus():
