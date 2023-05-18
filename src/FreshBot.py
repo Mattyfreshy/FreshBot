@@ -11,7 +11,7 @@ load_dotenv()
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=setup.get_prefix, intents=intents)
-EXTENSIONS = ['cogs.trading', 'cogs.commands', 'cogs.chatGPT']
+EXTENSIONS = ['cmds.commands']
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -66,6 +66,10 @@ def run_discord_bot():
     # On ready
     @bot.event
     async def on_ready():
+        # Load extensions
+        for extension in EXTENSIONS:
+            await bot.load_extension(extension)
+        
         # Bot Running
         print(f'{bot.user} is now running!')
 
@@ -98,14 +102,11 @@ def run_discord_bot():
         #     await message.channel.send("ChatGPT support in progress..." )
 
     # Run bot
-    bot.run(os.getenv('DISCORD_TOKEN'), bot=True, reconnect=True)
+    bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
     
 
     
 def main():
-    for extension in EXTENSIONS:
-        bot.load_extension(extension)
-
     run_discord_bot()
     
 if __name__ == '__main__':

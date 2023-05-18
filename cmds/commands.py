@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import random
-import trading as td
+import src.trading as td
 
 
 
@@ -19,17 +19,17 @@ class commandsCog(commands.Cog):
         else:
             await ctx.send("You don't have permissions to do that")
 
-    @commands.command()
+    @commands.command(name='hello')
     async def hello(self, ctx):
         """ Howdy """
         await ctx.send('Rise and shine Barbie, its gona be a good day!')
     
-    @commands.command()
+    @commands.command(name='roll')
     async def roll(self, ctx): 
         """ Roll a Dice """
         await ctx.send(str(random.randint(1,6)))
 
-    @commands.command()
+    @commands.command(name='random')
     async def random(self, ctx, min, max):
         """ Get a random number [min] [max]] """
         try:
@@ -38,7 +38,7 @@ class commandsCog(commands.Cog):
             print(e)
             await ctx.send('Error getting random number')
     
-    @commands.command()
+    @commands.command(name='quote')
     async def quote(self, ctx, stock):
         """ Get [stock] quote: """
         try:
@@ -47,6 +47,6 @@ class commandsCog(commands.Cog):
             print(e)
             await ctx.send('Error getting quote or quote does not exist')
 
-    @commands.command()
+    @commands.command(name='ping')
     async def ping(ctx: commands.context.Context):
         await ctx.channel.send("pong")
