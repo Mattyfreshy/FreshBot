@@ -1,6 +1,9 @@
 import discord
+from discord.ext import commands
+import FreshBot as fb
 import random, trading
 from enum import Enum
+
 
 # Enum to store information about every command
 class Inputs(Enum):
@@ -9,11 +12,11 @@ class Inputs(Enum):
     random = "Get a random number [min] [max]]"
     hello = "Howdy"
     quote = "Get [stock] quote: "
-    purge = "Purge [number] messages. (Admin only, Use at your own risk)"
+    purge = "Purge [number] messages not including this message. (Admin only, Use at your own risk)"
     
     
 # Function to handle responses
-async def handle_responses(message: discord.Message, trigger) -> str:
+async def handle_responses(message, trigger) -> str:
     args = message.split(' ')[1:]
     command = message.split(' ')[0].lower()
 
@@ -24,17 +27,6 @@ async def handle_responses(message: discord.Message, trigger) -> str:
             help_lst.append(i.name.capitalize() + ': ' + i.value)
             
         return '\n'.join(help_lst)
-
-    elif command == 'purge':
-        try:
-            if message.author.guild_permissions.administrator:
-                await message.channel.purge(limit=int(args[0]) + 1)
-                return 'Purged ' + str(args[0]) + ' messages' if int(args[0]) <= 100 else 'Max purge is 100 messages'
-            else:
-                return 'Purge failed: user does not have admin permissions'
-        except Exception as e:
-            print(e)
-            return 'Error purging messages'
     
     elif command == 'hello':
         return 'Rise and shine Barbie, its gona be a good day!'
@@ -57,3 +49,11 @@ async def handle_responses(message: discord.Message, trigger) -> str:
             return 'Error getting quote or quote does not exist'
     
     return 'Message not handled'
+
+
+@fb.client.command()
+async def purge(messages, amount=0):
+    if messages.author.permissions_in(messages.channel).administrator:
+        await messages.channel.purge(limit=amount)
+    else:
+        await messages.send("You don't have permissions to do that")

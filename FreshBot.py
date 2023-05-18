@@ -1,11 +1,18 @@
 import os, discord, responses, asyncio
+from discord.ext import commands
 from dotenv import load_dotenv
 
 # Other modules imports
 import trading as td
 import datetime as dt
-from functools import reduce
-from operator import concat
+
+# Load environment variables
+load_dotenv()     
+publicTrigger = '!'
+privateTrigger = '$'
+intents = discord.Intents.default()
+intents.message_content = True
+client = commands.Bot(command_prefix=publicTrigger, intents=intents)
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -20,7 +27,7 @@ async def get_quote(channel):
     # Variables
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
-    def marketStatus(): return dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 41)
+    def marketStatus(): return dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
 
     # Print and send todays date
     if marketStatus():
@@ -42,7 +49,7 @@ async def get_quote(channel):
             await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
             await channel.send(td.get_stock_quotes())
             await channel.send("------------------")
-            await asyncio.sleep(60 * 1) # 1 * 15 minutes
+            await asyncio.sleep(60 * 15) # 1 * n minutes
 
         except Exception as e:
             print("Error getting quote: ")
@@ -57,15 +64,7 @@ async def get_quote(channel):
         
 # Run discord bot
 def run_discord_bot():
-    # Init discord client
-    intents = discord.Intents.default()
-    intents.message_content = True
-    client = discord.Client(intents=intents)
-
-    # Init/load variables
-    load_dotenv()     
-    publicTrigger = '!'
-    privateTrigger = '$'
+    
 
     # On ready
     @client.event
@@ -77,11 +76,11 @@ def run_discord_bot():
         await get_quote(client.get_channel(int(os.getenv('CHANNEL_ID'))))
 
     # On message
-    @client.event
+    @client.listen()
     async def on_message(message: discord.Message):
         # prevent bot from responding to itself
-        if message.author == client.user:
-            return
+        # if message.author == client.user:
+        #     return
         
         # Get User infos
         username = str(message.author)
