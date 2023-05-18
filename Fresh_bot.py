@@ -20,17 +20,17 @@ async def get_quote(channel):
     # Variables
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
-    marketStatus = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 20)
+    def marketStatus(): dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 26)
 
     # Print and send todays date
-    if marketStatus:
+    if marketStatus():
         print(date)
         await channel.send(spacer)
         await channel.send("**\* " + date + " \*** ")
         await channel.send(spacer)
 
     # Get quote while time is between 9:30 and 4:00
-    while marketStatus:
+    while marketStatus():
         try:
             # Get Quote to terminal
             print("\nGetting quote...")
@@ -42,7 +42,7 @@ async def get_quote(channel):
             await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
             await channel.send(td.get_stock_quotes())
             await channel.send("------------------")
-            await asyncio.sleep(60 * 1) # 1 * 15 minutes
+            await asyncio.sleep(60 * 15) # 1 * 15 minutes
 
         except Exception as e:
             print("Error getting quote: ")
