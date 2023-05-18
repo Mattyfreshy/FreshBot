@@ -6,7 +6,7 @@ class Inputs(Enum):
     help = "List of commands"
     roll = "Roll a Dice"
     hello = "Howdy"
-    getQuote = "Get [stock] quote: "
+    quote = "Get [stock] quote: "
     
     
 # Function to handle responses
@@ -28,7 +28,7 @@ def handle_responses(message, trigger) -> str:
     if command == 'roll':
         return str(random.randint(1,6))   
     
-    if command == 'getquote':
+    if command == 'quote':
         try:
             return trading.get_quote(args[0].upper())
         except Exception as e:

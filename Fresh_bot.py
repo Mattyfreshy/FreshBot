@@ -16,20 +16,22 @@ async def send_message(message, user_message, is_private, trigger):
 # Sends stock quote every minute
 async def get_quote(channel):
     # Print and send todays date
-    print("Date: ")
-    print(dt.date.today())
-    await channel.send("Date: ")
-    await channel.send(dt.date.today())
+    print("Date: ", dt.date.today())
+    await channel.send("Date: ", dt.date.today())
 
     # Get quote while time is between 9:30 and 4:00
     while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
         try:
-            # Get Quote
+            # Get Quote to terminal
             print("Getting quote..`.")
             print(dt.datetime.now().time())
             await asyncio.sleep(1)
-            await channel.send(dt.datetime.now().time().strftime("%H:%M"))
+
+            # Send quote to channel + sleep before next quote
+            await channel.send("------------------\n")
+            await channel.send("Time: ", dt.datetime.now().time().strftime("%H:%M"))
             await channel.send(td.get_stock_quotes())
+            await channel.send("------------------\n")
             await asyncio.sleep(60 * 15) # 1 * 15 minutes
 
         except Exception as e:

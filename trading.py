@@ -34,10 +34,7 @@ def get_stock_quotes():
     for tick in ticks:
         summary.append(tick.info['symbol'] + ": " + str(tick.info['currentPrice']) + " " + str(tick.info['currency']))
         summary.append("\n")
-    
-    # Add Spacer
-    summary.append("------------------\n")
-
+        
     # Return summary
     return ''.join(summary)
     
