@@ -5,7 +5,8 @@ import datetime as dt
 
 # Global variables
 SOURCE = 'yahoo'
-TICKERS = ['AAPL', 'META', 'TSLA', 'AMZN']
+TICKERS_ETF = ['SPY', 'VOO']
+TICKERS_EQUITY = ['AAPL', 'META', 'TSLA', 'AMZN', 'NVDA', 'AMD']
 TODAY = dt.date.today()
 NOW = dt.datetime.now()
 WEEK_START = TODAY - dt.timedelta(days=TODAY.weekday())
@@ -22,7 +23,7 @@ def get_stock_quotes():
     summary = []
     
     # Get stock data
-    for ticker in TICKERS:
+    for ticker in TICKERS_EQUITY:
         ticks.append(yf.Ticker(ticker))
     
     # Get stock info
