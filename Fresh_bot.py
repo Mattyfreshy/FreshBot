@@ -48,8 +48,9 @@ async def get_quote(channel):
             await asyncio.sleep(1)
         
     # Stop quote
-    print("Quote stopped")
+    print("Stock Market Closed")
     print(dt.datetime.now().time())
+    await channel.send("Stock Market Closed")
     await asyncio.sleep(1)
         
 # Run discord bot
@@ -61,7 +62,8 @@ def run_discord_bot():
 
     # Init/load variables
     load_dotenv()     
-    trigger = '!'
+    publicTrigger = '!'
+    privateTrigger = '$'
 
     # On ready
     @client.event
@@ -74,7 +76,7 @@ def run_discord_bot():
 
     # On message
     @client.event
-    async def on_message(message):
+    async def on_message(message: discord.Message):
         # prevent bot from responding to itself
         if message.author == client.user:
             return
@@ -87,19 +89,15 @@ def run_discord_bot():
         # Debug data
         print(f"{username} said: '{user_message}' ({channel})")
         
-        # If special character used, trigger bot response
-        if user_message[0] == trigger:
+        # If publicTrigger/privateTrigger used, trigger bot response
+        if user_message[0] == publicTrigger:
             user_message = user_message[1:]
-            await send_message(message, user_message, False, trigger)
+            await send_message(message, user_message, False, publicTrigger)
+        elif user_message[0] == privateTrigger:
+            user_message = user_message[1:]
+            await send_message(message, user_message, True, privateTrigger)
         elif isinstance(message.channel, discord.channel.DMChannel):
             await message.channel.send("ChatGPT support in progress..." )
-          
-        # use ! to send private messages to user  
-        # if user_message[0] == '!':
-        #     user_message = user_message[1:]
-        #     await send_message(message, user_message, is_private=True)
-        # else:
-        #     await send_message(message, user_message, is_private=False)
 
     # Run bot
     client.run(os.getenv('DISCORD_TOKEN'))
