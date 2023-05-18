@@ -4,6 +4,7 @@ import FreshBot as fb
 import random, trading
 from enum import Enum
 
+## NO LONGER SUPPORTED SINCE SWITCH TO BOT FROM CLIENT ##
 
 # Enum to store information about every command
 class Inputs(Enum):
@@ -12,7 +13,7 @@ class Inputs(Enum):
     random = "Get a random number [min] [max]]"
     hello = "Howdy"
     quote = "Get [stock] quote: "
-    purge = "Purge [number] messages not including this message. (Admin only, Use at your own risk)"
+    clear = "Clear [number] messages not including this message. (Admin only, Use at your own risk)"
     
     
 # Function to handle responses
@@ -27,6 +28,17 @@ async def handle_responses(message, trigger) -> str:
             help_lst.append(i.name.capitalize() + ': ' + i.value)
             
         return '\n'.join(help_lst)
+    
+    elif command == 'clear':
+        # Clear messages
+        @fb.bot.command()
+        async def clear(messages, amount=0):
+            if messages.author.permissions_in(messages.channel).administrator:
+                await messages.channel.purge(limit=amount)
+            else:
+                await messages.send("You don't have permissions to do that")
+        
+        clear()
     
     elif command == 'hello':
         return 'Rise and shine Barbie, its gona be a good day!'
@@ -48,12 +60,9 @@ async def handle_responses(message, trigger) -> str:
             print(e)
             return 'Error getting quote or quote does not exist'
     
-    return 'Message not handled'
-
-
-@fb.client.command()
-async def purge(messages, amount=0):
-    if messages.author.permissions_in(messages.channel).administrator:
-        await messages.channel.purge(limit=amount)
     else:
-        await messages.send("You don't have permissions to do that")
+        return 'Message not handled'
+
+@fb.bot.command()
+async def ping(ctx: commands.context.Context):
+    await ctx.channel.send("pong")
