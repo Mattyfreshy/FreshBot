@@ -5,6 +5,7 @@ from enum import Enum
 class Inputs(Enum):
     help = "List of commands"
     roll = "Roll a Dice"
+    random = "Get a random number [min] [max]]"
     hello = "Howdy"
     quote = "Get [stock] quote: "
     
@@ -23,10 +24,17 @@ def handle_responses(message, trigger) -> str:
         return '\n'.join(help_lst)
     
     if command == 'hello':
-        return 'Howdy!'
+        return 'Rise and shine Barbie, its gona be a good day!'
     
     if command == 'roll':
         return str(random.randint(1,6))   
+    
+    if command == 'random':
+        try:
+            return str(random.randint(int(args[0]), int(args[1])))
+        except Exception as e:
+            print(e)
+            return 'Error getting random number'
     
     if command == 'quote':
         try:

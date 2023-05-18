@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 # Other modules imports
 import trading as td
 import datetime as dt
+from functools import reduce
+from operator import concat
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -15,23 +17,29 @@ async def send_message(message, user_message, is_private, trigger):
 
 # Sends stock quote every minute
 async def get_quote(channel):
+    # Variables
+    date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
+    spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
+
     # Print and send todays date
-    print("Date: ", dt.date.today())
-    await channel.send("Date: ", dt.date.today())
+    print(date)
+    await channel.send(spacer)
+    await channel.send("**\* " + date + " \*** ")
+    await channel.send(spacer)
 
     # Get quote while time is between 9:30 and 4:00
     while dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00):
         try:
             # Get Quote to terminal
-            print("Getting quote..`.")
-            print(dt.datetime.now().time())
+            print("\nGetting quote...")
+            print(dt.datetime.now().time(), "\n")
             await asyncio.sleep(1)
 
             # Send quote to channel + sleep before next quote
-            await channel.send("------------------\n")
-            await channel.send("Time: ", dt.datetime.now().time().strftime("%H:%M"))
+            await channel.send("------------------")
+            await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
             await channel.send(td.get_stock_quotes())
-            await channel.send("------------------\n")
+            await channel.send("------------------")
             await asyncio.sleep(60 * 15) # 1 * 15 minutes
 
         except Exception as e:
