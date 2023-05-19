@@ -42,7 +42,6 @@ def get_stock_quotes():
     
 
 def main():
-    print(get_stock_quotes())
     return
 
     # Get stock data

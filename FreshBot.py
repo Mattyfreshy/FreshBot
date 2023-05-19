@@ -29,33 +29,39 @@ async def send_message(message, user_message, is_private, trigger):
         print(e)
 
 # Sends stock quote every minute
-async def get_quote(channel):
+async def get_quote(channels):
     # Variables
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
     def marketStatus(): return dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
+    # def marketStatus(): return True
 
     # Print and send todays date
     if marketStatus():
         print(date)
-        await channel.send(spacer)
-        await channel.send("**\* " + date + " \*** ")
-        await channel.send(spacer)
+        response = spacer + "\n**\* " + date + " \*** \n" + spacer
+        for channel in channels:
+            await channel.send(response)
 
     # Get quote while time is between 9:30 and 4:00
     while marketStatus():
         try:
-            # Get Quote to terminal
-            print("\nGetting quote...")
-            print(dt.datetime.now().time(), "\n")
-            await asyncio.sleep(1)
+            response = "------------------\n"
+            response += "**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**\n"
+            response += td.get_stock_quotes()
+            response += "------------------\n"
+            for channel in channels:
+                # Get Quote timestamp to terminal
+                print("\nGetting quote for: " + channel.guild.name)
+                print(dt.datetime.now().time(), "\n")
 
-            # Send quote to channel + sleep before next quote
-            await channel.send("------------------")
-            await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
-            await channel.send(td.get_stock_quotes())
-            await channel.send("------------------")
-            await asyncio.sleep(60 * 15) # 1 * n minutes
+                # Send quote to channel + sleep before next quote
+                await channel.send(response)
+                # await channel.send("------------------")
+                # await channel.send("**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**")
+                # await channel.send(td.get_stock_quotes())
+                # await channel.send("------------------")
+                await asyncio.sleep(10 * 1) # 1 * n minutes
 
         except Exception as e:
             print("Error getting quote: ")
@@ -66,8 +72,8 @@ async def get_quote(channel):
     print("Stock Market Closed")
     print(dt.datetime.now().time())
     print("\n")
-    # await channel.send("Stock Market Closed")
-    await asyncio.sleep(1)
+    # # await channel.send("Stock Market Closed")
+    # await asyncio.sleep(1)
         
 # Run discord bot
 def run_discord_bot():
@@ -90,11 +96,14 @@ def run_discord_bot():
         # Bot Running
         print(f'{bot.user} is now running!\n')
 
-        # Get ids of 'stock-trading' channels
+        # Get all 'stock-trading' channels
+        channels = []
         for channel in bot.get_all_channels():
             if channel.name == 'stock-trading':
-                print(channel.guild.name, " : ", channel.name)
-                await get_quote(bot.get_channel(channel.id))
+                channels.append(bot.get_channel(channel.id))
+        
+        # Get quotes for all channels
+        await get_quote(channels)
 
     # On message
     @bot.listen()
@@ -105,7 +114,10 @@ def run_discord_bot():
         channel = str(message.channel)
         
         # Debug data
-        print(f"{username} said: '{user_message}' ({channel})\n")
+        # Ignore bot messages
+        if message.author == bot.user:
+            return
+        print(f"{username} said: \n'{user_message}' ({channel})\n\n")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
