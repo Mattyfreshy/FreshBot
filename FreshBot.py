@@ -117,7 +117,7 @@ def run_discord_bot():
         await get_quote(channels, False)
 
     # On message
-    @bot.listen()
+    @bot.event()
     async def on_message(message: discord.Message):
         # Get User infos
         username = str(message.author)
