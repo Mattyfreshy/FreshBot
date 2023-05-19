@@ -36,16 +36,16 @@ class ChatGPT(commands.Cog):
             )
             return response.choices[0].text
         except Exception as e:
-            print(e)
+            print("chatGPT Error: ", e)
             return "Error getting response"
 
     # Ask something
-    # @commands.guild_only()
+    @commands.guild_only()
     @commands.command(name='ask')
     async def ask(self, ctx, *, message):
         """ Ask the bot something """
         await self.send_message(ctx, await self.get_response(message))
         
-        
+
 async def setup(bot):
     await bot.add_cog(ChatGPT(bot))
