@@ -5,7 +5,7 @@ from flask import Flask, redirect, render_template, request, url_for
 
 
 # Enable or Disable chatbot features
-ENABLED = False
+ENABLED = True
 
 # Load environment variables
 openai.api_key = os.getenv('OPENAI_API_KEY')
