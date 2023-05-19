@@ -3,8 +3,13 @@
         "cmds",
         "datareader",
         "dotenv",
+        "ffmpegopts",
         "gona",
+        "nocheckcertificate",
+        "noplaylist",
         "TSLA",
-        "yfinance"
+        "yfinance",
+        "ytdl",
+        "ytdlopts"
     ]
 }
