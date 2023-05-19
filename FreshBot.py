@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import trading as td
 import datetime as dt
 
-# Load environment variables
+
 load_dotenv()
 
 def get_prefix(client, message):

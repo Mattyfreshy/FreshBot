@@ -1,9 +1,6 @@
 import discord, os
 from discord.ext import commands
 import openai
-from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request, url_for
-
 
 # Enable or Disable chatbot features
 ENABLED = True
