@@ -1,6 +1,7 @@
-import FreshBot as fb
 import discord, os
 from discord.ext import commands
+import FreshBot as fb
+
 import openai
 
 # Enable or Disable chatbot features
@@ -14,6 +15,7 @@ class ChatGPT(commands.Cog):
     
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        print(fb.get_time_format(12))
         print("ChatGPT Cog Error: \n", error)
     
     # Send message to channel depending on if chatbot is enabled

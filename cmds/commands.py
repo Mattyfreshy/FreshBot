@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
+import FreshBot as fb
 import random
-
-from discord.ext.commands.context import Context
 import trading as td
 
 class Commands(commands.Cog):
@@ -11,6 +10,7 @@ class Commands(commands.Cog):
 
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        print(fb.get_time_format(12))
         print("Commands Cog Error: \n", error, "\n")
 
     # Clear num messages

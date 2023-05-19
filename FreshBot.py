@@ -1,8 +1,6 @@
 import os, discord, responses, asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
-
-# Other modules imports
 import trading as td
 import datetime as dt
 
