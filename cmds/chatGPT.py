@@ -39,6 +39,7 @@ class ChatGPT(commands.Cog):
             return "Error getting response"
 
     # Ask something
+    @commands.guild_only()
     @commands.command(name='ask')
     async def ask(self, ctx, *, message):
         """ Ask the bot something """
