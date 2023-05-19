@@ -1,6 +1,7 @@
 import discord, os
 from discord.ext import commands
 import openai
+from dotenv import load_dotenv
 
 # Enable or Disable chatbot features
 ENABLED = True
@@ -8,6 +9,7 @@ ENABLED = True
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
         # Load variables
+        load_dotenv()
         openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
     
