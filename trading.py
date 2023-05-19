@@ -1,4 +1,4 @@
-from asyncio import sleep
+import asyncio
 import yfinance as yf
 import pandas_datareader.data as web
 import pandas as pd
@@ -18,7 +18,7 @@ def read_tickers(file) -> list:
 # Get quote of single stock
 def get_quote(tick) -> str:
     stock = yf.Ticker(tick)
-    sleep(5)
+    asyncio.sleep(5)
     return stock.info['symbol'] + ": " + str(stock.info['currentPrice']) + " " + str(stock.info['currency'])
 
 # Returns stock data of all tickers
