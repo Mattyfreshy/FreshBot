@@ -1,6 +1,7 @@
 import discord, os
 from discord.ext import commands
 import openai
+from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 
 
@@ -8,6 +9,7 @@ from flask import Flask, redirect, render_template, request, url_for
 ENABLED = True
 
 # Load environment variables
+load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
