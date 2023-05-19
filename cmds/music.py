@@ -175,7 +175,7 @@ class Music(commands.Cog):
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
-        print("Music Cog Error: \n", error, "\n")
+        print("Music Cog Error: \n", ctx, error, "\n")
 
     async def cleanup(self, guild):
         try:
