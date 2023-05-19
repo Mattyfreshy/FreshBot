@@ -118,7 +118,7 @@ def run_discord_bot():
         # Ignore bot messages
         if message.author == bot.user:
             return
-        print(f"{username} said: \n'{user_message}' ({channel})\n\n")
+        print(f"\n{username} said: \n'{user_message}' ({channel})")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
