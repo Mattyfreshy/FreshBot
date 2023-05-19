@@ -11,5 +11,5 @@ class ChatGPT(commands.Cog):
         """ Say something """
         await ctx.send(message)
 
-def setup(bot):
-    bot.add_cog(ChatGPT(bot))
+async def setup(bot):
+    await bot.add_cog(ChatGPT(bot))

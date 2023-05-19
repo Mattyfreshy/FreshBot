@@ -62,7 +62,3 @@ async def handle_responses(message, trigger) -> str:
     
     else:
         return 'Message not handled'
-
-@fb.bot.command()
-async def ping(ctx: commands.context.Context):
-    await ctx.channel.send("pong")

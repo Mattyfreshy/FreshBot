@@ -7,15 +7,32 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Clear messages
+    # Clear num messages
     @commands.guild_only()
-    @commands.command(name='clear')
-    async def clear(self, ctx, amount=0):
-        """ Clear [number] messages not including this message. (Admin only, Use at your own risk) """
-        if ctx.author.permissions_in(ctx.channel).administrator:
+    @commands.has_permissions(administrator=True)
+    @commands.command(name='purge')
+    async def purge(self, ctx, amount=0):
+        """ Purge [number] messages. (Admin only, Use at your own risk) """
+        try:
             await ctx.channel.purge(limit=amount + 1)
-        else:
-            await ctx.send("You don't have permissions to do that")
+        except Exception as e:
+            print(e)
+            await ctx.send('Missing permissions or invalid number of messages')
+
+    # Clear all messages
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(name='purgeAll')
+    async def purge_all(self, ctx):
+        """ Purge all messages. (Admin only, Use at your own risk) """
+        try:
+            limit = 0
+            async for _ in ctx.channel.history(limit=None):
+                limit += 1
+            await ctx.channel.purge(limit=limit)
+        except Exception as e:
+            print(e)
+            await ctx.send('Missing permissions')
 
     @commands.command(name='hello')
     async def hello(self, ctx):
@@ -47,7 +64,8 @@ class Commands(commands.Cog):
 
     @commands.command(name='ping')
     async def ping(self, ctx: commands.context.Context):
+        """ Ping """
         await ctx.channel.send("pong")
 
-def setup(bot):
-    bot.add_cog(Commands(bot))
+async def setup(bot):
+    await bot.add_cog(Commands(bot))

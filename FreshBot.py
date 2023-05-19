@@ -1,4 +1,4 @@
-import os, discord, responses, asyncio, setup, pathlib
+import os, discord, responses, asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -7,10 +7,18 @@ import trading as td
 import datetime as dt
 
 # Load environment variables
-load_dotenv()     
-intents = discord.Intents.default()
-intents.message_content = True
-bot = commands.Bot(command_prefix=setup.get_prefix, intents=intents)
+load_dotenv()
+
+def get_prefix(client, message):
+    # Public triggers
+    prefixes = ['!', '?', '.']
+    
+    # Private triggers
+    if not message.guild:
+        return '$'
+
+    # If in guild allow for users to mention bot
+    return commands.when_mentioned_or(*prefixes)(client, message)
 
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
@@ -62,6 +70,11 @@ async def get_quote(channel):
         
 # Run discord bot
 def run_discord_bot():
+    intents = discord.Intents.default()
+    intents.message_content = True
+    help_command = commands.DefaultHelpCommand(no_category='Help')
+    bot = commands.Bot(command_prefix=get_prefix, help_command=help_command , intents=intents)
+
     # On ready
     @bot.event
     async def on_ready():
@@ -79,10 +92,6 @@ def run_discord_bot():
     # On message
     @bot.listen()
     async def on_message(message: discord.Message):
-        # prevent bot from responding to itself
-        # if message.author == client.user:
-        #     return
-        
         # Get User infos
         username = str(message.author)
         user_message = str(message.content)
@@ -90,16 +99,6 @@ def run_discord_bot():
         
         # Debug data
         print(f"{username} said: '{user_message}' ({channel})")
-        
-        # If publicTrigger/privateTrigger used, trigger bot response
-        # if user_message[0] == publicTrigger:
-        #     user_message = user_message[1:]
-        #     await send_message(message, user_message, False, publicTrigger)
-        # elif user_message[0] == privateTrigger:
-        #     user_message = user_message[1:]
-        #     await send_message(message, user_message, True, privateTrigger)
-        # elif isinstance(message.channel, discord.channel.DMChannel):
-        #     await message.channel.send("ChatGPT support in progress..." )
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
