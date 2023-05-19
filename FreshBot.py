@@ -94,7 +94,7 @@ def run_discord_bot():
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
         
         # Bot Running
-        print(f'{bot.user} is now running!\n')
+        print(f'{bot.user} is now running!')
         print(str(dt.datetime.now().time().strftime("%H:%M")), "\n")
 
         # Get all 'stock-trading' channels
