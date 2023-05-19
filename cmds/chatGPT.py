@@ -31,7 +31,7 @@ class ChatGPT(commands.Cog):
             response = openai.Completion.create(
                 engine="text-davinci-003",
                 prompt=message,
-                temperature=0.6,
+                temperature=0.9,
                 max_tokens=150,
                 presence_penalty=0.6,
             )
