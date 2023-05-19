@@ -8,13 +8,10 @@ from flask import Flask, redirect, render_template, request, url_for
 # Enable or Disable chatbot features
 ENABLED = True
 
-# Load environment variables
-load_dotenv()
-openai.api_key = os.getenv('OPENAI_API_KEY')
-
-
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
+        # Load variables
+        openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
     
     # Send message to channel depending on if chatbot is enabled
