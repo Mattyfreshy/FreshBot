@@ -16,7 +16,7 @@ class ChatGPT(commands.Cog):
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
-        print("ChatGPT Cog Error: \n", error)
+        print("ChatGPT Cog Error: \n", ctx, error)
     
     # Send message to channel depending on if chatbot is enabled
     async def send_message(self, ctx, message):
