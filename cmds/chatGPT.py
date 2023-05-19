@@ -1,3 +1,4 @@
+import FreshBot as fb
 import discord, os
 from discord.ext import commands
 import openai
@@ -13,7 +14,7 @@ class ChatGPT(commands.Cog):
     
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        print("ChatGPT Cog Error: \n", error, "\n")
+        print("ChatGPT Cog Error: \n", error)
     
     # Send message to channel depending on if chatbot is enabled
     async def send_message(self, ctx, message):
@@ -30,7 +31,7 @@ class ChatGPT(commands.Cog):
             response = openai.Completion.create(
                 engine="text-davinci-003",
                 prompt=message,
-                temperature=0.9,
+                temperature=0.6,
                 max_tokens=150,
                 presence_penalty=0.6,
             )

@@ -106,8 +106,8 @@ def run_discord_bot():
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
         
         # Bot Running
-        print(f'{bot.user} is now running!')
         print(get_time_format(12), "\n")
+        print(f'{bot.user} is now running!')
 
         # Get all 'stock-trading' channels
         channels = []
@@ -131,7 +131,7 @@ def run_discord_bot():
         if message.author == bot.user:
             return
         print(get_time_format(12))
-        print(f"{username} said: \n'{user_message}' ({channel})")
+        print(f"{username} said: \n'{user_message}' ({channel})\n")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
