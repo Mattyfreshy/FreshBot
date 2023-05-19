@@ -37,7 +37,7 @@ class ChatGPT(commands.Cog):
     @commands.command(name='ask')
     async def ask(self, ctx, *, message):
         """ Ask the bot something """
-        await self.send_message(ctx, self.get_response(message))
+        await self.send_message(ctx, await self.get_response(message))
         
 
 async def setup(bot):
