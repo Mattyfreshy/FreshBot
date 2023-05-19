@@ -126,7 +126,7 @@ def run_discord_bot():
         
         # Debug data
         # Ignore bot messages
-        if not isinstance(message.channel, discord.channel.DMChannel):
+        if message.author == bot.user and not isinstance(message.channel, discord.channel.DMChannel):
             return
         print(get_time_format(12))
         print(f"{username} said: \n'{user_message}' ({channel})\n")
