@@ -18,8 +18,7 @@ def read_tickers(file) -> list:
 # Get quote of single stock
 def get_quote(tick) -> str:
     stock = yf.Ticker(tick)
-    asyncio.sleep(5)
-    return stock.info['symbol'] + ": " + str(stock.info['currentPrice']) + " " + str(stock.info['currency'])
+    return stock.info.get('symbol') + ": " + str(stock.info.get('currentPrice')) + " " + str(stock.info.get('currency'))
 
 # Returns stock data of all tickers
 def get_stock_quotes():
@@ -28,16 +27,15 @@ def get_stock_quotes():
     tickersEquity = read_tickers('tickersEquity.txt')
     tickersETF = read_tickers('tickersETF.txt')
     
-    print(tickersEquity), print(tickersETF)
     # Get stock data
-    summary += ['Equity:\n']
+    summary += ['__Equity:__\n']
     for ticker in tickersEquity:
-        print(ticker)
-        print(summary)
         summary += [get_quote(ticker), '\n']
 
-    summary += ['\nETF:\n']
+
+    summary += ['\n__ETF:__\n']
     for ticker in tickersETF:
+        print(yf.Ticker(ticker).info)
         summary += [get_quote(ticker), '\n']
         
     # Return summary
