@@ -35,7 +35,6 @@ def get_stock_quotes():
 
     summary += ['\n__ETF:__\n']
     for ticker in tickersETF:
-        print(yf.Ticker(ticker).info)
         summary += [get_quote(ticker), '\n']
         
     # Return summary
