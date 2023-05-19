@@ -212,7 +212,7 @@ class Music(commands.Cog):
 
         return player
 
-    @commands.command(name='connect', aliases=['join'])
+    @commands.command(name='join', aliases=['connect'])
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
         """Connect to voice.
         Parameters
@@ -244,6 +244,18 @@ class Music(commands.Cog):
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
         await ctx.send(f'Connected to: **{channel}**', delete_after=20)
+
+    @commands.command(name='leave', aliases=['disconnect'])
+    async def leave_(self, ctx):
+        """Disconnect from voice.
+            This command also stops the music if it's playing.
+        """
+        vc = ctx.voice_client
+
+        if not vc:
+            return await ctx.send('I am not currently connected to voice!', delete_after=20)
+
+        await self.cleanup(ctx.guild)
 
     @commands.command(name='play', aliases=['sing'])
     async def play_(self, ctx, *, search: str):
