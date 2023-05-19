@@ -175,6 +175,7 @@ class Music(commands.Cog):
         try:
             await guild.voice_client.disconnect()
         except AttributeError:
+            print("AttributeError")
             pass
 
         try:
