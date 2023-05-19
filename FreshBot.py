@@ -61,7 +61,7 @@ async def get_quote(channels, enabled):
         while marketStatus():
             try:
                 response = "------------------\n"
-                response += "**Time: " + str(get_time_format(12)) + "**\n"
+                response += "**Time: " + get_time_format(12) + "**\n"
                 response += td.get_stock_quotes()
                 response += "------------------\n"
                 for channel in channels:
@@ -107,7 +107,7 @@ def run_discord_bot():
         
         # Bot Running
         print(f'{bot.user} is now running!')
-        print(str(dt.datetime.now().time().strftime("%H:%M")), "\n")
+        print(get_time_format(12), "\n")
 
         # Get all 'stock-trading' channels
         channels = []
@@ -130,6 +130,7 @@ def run_discord_bot():
         # Ignore bot messages
         if message.author == bot.user:
             return
+        print(get_time_format(12))
         print(f"\n{username} said: \n'{user_message}' ({channel})")
 
     # Run bot
@@ -138,7 +139,6 @@ def run_discord_bot():
 
     
 def main():
-    print(get_time_format(12))
     run_discord_bot()
     
 if __name__ == '__main__':
