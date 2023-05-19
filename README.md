@@ -9,8 +9,8 @@
 - All 'stock-trading' channels that the bot has access to will be updated with the current price of the stock set.
 
 ## Updates
-Code has been converted from using discord.client to discord.bot for better functionality.  
-responses.py is now redundant, but there for legacy reasons.  
+- Code has been converted from using discord.client to discord.bot for better functionality.  
+- responses.py is now redundant, but there for legacy reasons.  
 
 ## Setup
 
