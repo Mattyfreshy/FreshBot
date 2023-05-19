@@ -34,6 +34,7 @@ async def get_quote(channel):
     date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
     spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
     def marketStatus(): return dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
+    # def marketStatus(): return True
 
     # Print and send todays date
     if marketStatus():
@@ -65,6 +66,8 @@ async def get_quote(channel):
     # Stop quote
     print("Stock Market Closed")
     print(dt.datetime.now().time())
+    print("\n")
+    # await channel.send("Stock Market Closed")
     await asyncio.sleep(1)
         
 # Run discord bot
@@ -86,10 +89,13 @@ def run_discord_bot():
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
         
         # Bot Running
-        print(f'{bot.user} is now running!')
+        print(f'{bot.user} is now running!\n')
 
-        # Get quote
-        await get_quote(bot.get_channel(int(os.getenv('CHANNEL_ID'))))
+        # Get ids of 'stock-trading' channels
+        for channel in bot.get_all_channels():
+            if channel.name == 'stock-trading':
+                print(channel.guild.name, " : ", channel.name)
+                await get_quote(bot.get_channel(channel.id))
 
     # On message
     @bot.listen()
@@ -100,7 +106,7 @@ def run_discord_bot():
         channel = str(message.channel)
         
         # Debug data
-        print(f"{username} said: '{user_message}' ({channel})")
+        print(f"{username} said: '{user_message}' ({channel})\n")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)

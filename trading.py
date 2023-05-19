@@ -1,3 +1,4 @@
+from asyncio import sleep
 import yfinance as yf
 import pandas_datareader.data as web
 import pandas as pd
@@ -5,41 +6,46 @@ import datetime as dt
 
 # Global variables
 SOURCE = 'yahoo'
-TICKERS_ETF = ['SPY', 'VOO']
-TICKERS_EQUITY = ['AAPL', 'META', 'TSLA', 'AMZN', 'NVDA', 'AMD']
 TODAY = dt.date.today()
 NOW = dt.datetime.now()
 WEEK_START = TODAY - dt.timedelta(days=TODAY.weekday())
 
+# Read tickers from file and return list of tickers as strings
+def read_tickers(file) -> list:
+    with open(file, 'r') as f:
+        return f.read().splitlines()
+
 # Get quote of single stock
-def get_quote(tick):
+def get_quote(tick) -> str:
     stock = yf.Ticker(tick)
+    sleep(5)
     return stock.info['symbol'] + ": " + str(stock.info['currentPrice']) + " " + str(stock.info['currency'])
 
 # Returns stock data of all tickers
 def get_stock_quotes():
     ticks = []
-    stock_infos = []
     summary = []
+    tickersEquity = read_tickers('tickersEquity.txt')
+    tickersETF = read_tickers('tickersETF.txt')
     
+    print(tickersEquity), print(tickersETF)
     # Get stock data
-    for ticker in TICKERS_EQUITY:
-        ticks.append(yf.Ticker(ticker))
-    
-    # Get stock info
-    for stock in ticks:
-        stock_infos.append(stock.info)
+    summary += ['Equity:\n']
+    for ticker in tickersEquity:
+        print(ticker)
+        print(summary)
+        summary += [get_quote(ticker), '\n']
 
-    # Create summary
-    for tick in ticks:
-        summary.append(tick.info['symbol'] + ": " + str(tick.info['currentPrice']) + " " + str(tick.info['currency']))
-        summary.append("\n")
+    summary += ['\nETF:\n']
+    for ticker in tickersETF:
+        summary += [get_quote(ticker), '\n']
         
     # Return summary
     return ''.join(summary)
     
 
 def main():
+    print(get_stock_quotes())
     return
 
     # Get stock data
