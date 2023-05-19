@@ -11,17 +11,17 @@ class ChatGPT(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def is_enabled(self, ctx, function):
+    async def send_message(self, ctx, message):
         if ENABLED:
-            function()
+            await ctx.send(message)
         else:
-            ctx.send("This feature is currently disabled.")
+            await ctx.send("This feature is currently disabled.")
 
     # Say something
     @commands.command(name='say')
     async def say(self, ctx, *, message):
         """ Say something """
-        await self.is_enabled(ctx.send(message))
+        await self.send_message(ctx, message)
         
 
 async def setup(bot):

@@ -45,16 +45,16 @@ class Commands(commands.Cog):
         await ctx.send(str(random.randint(1,6)))
 
     @commands.command(name='random')
-    async def random(self, ctx, min, max):
+    async def random(self, ctx, *, lower, upper):
         """ Get a random number [min] [max]] """
         try:
-            await ctx.send(str(random.randint(int(min), int(max))))
+            await ctx.send(str(random.randint(int(lower), int(upper))))
         except Exception as e:
             print(e)
             await ctx.send('Error getting random number')
     
     @commands.command(name='quote')
-    async def quote(self, ctx, stock):
+    async def quote(self, ctx, *, stock):
         """ Get [stock] quote: """
         try:
             await ctx.send(td.get_quote(stock.upper()))
@@ -63,7 +63,7 @@ class Commands(commands.Cog):
             await ctx.send('Error getting quote or quote does not exist')
 
     @commands.command(name='ping')
-    async def ping(self, ctx: commands.context.Context):
+    async def ping(self, ctx):
         """ Ping """
         await ctx.channel.send("pong")
 
