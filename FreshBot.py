@@ -20,6 +20,15 @@ def get_prefix(client, message):
     # If in guild allow for users to mention bot
     return commands.when_mentioned_or(*prefixes)(client, message)
 
+# Return time in 12 or 24 hour format depending on user preference
+def get_time_format(format):
+    if format == '12':
+        return dt.datetime.now().strftime("%I:%M %p")
+    elif format == '24':
+        return dt.datetime.now().strftime("%H:%M")
+    else:
+        return dt.datetime.now().strftime("%I:%M %p")
+    
 # Sends message from responses.py based on user message
 async def send_message(message, user_message, is_private, trigger):
     try:
@@ -52,7 +61,7 @@ async def get_quote(channels, enabled):
         while marketStatus():
             try:
                 response = "------------------\n"
-                response += "**Time: " + str(dt.datetime.now().time().strftime("%H:%M")) + "**\n"
+                response += "**Time: " + str(get_time_format(12)) + "**\n"
                 response += td.get_stock_quotes()
                 response += "------------------\n"
                 for channel in channels:
@@ -129,6 +138,7 @@ def run_discord_bot():
 
     
 def main():
+    print(get_time_format(12))
     run_discord_bot()
     
 if __name__ == '__main__':
