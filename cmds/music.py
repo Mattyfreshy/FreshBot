@@ -175,7 +175,6 @@ class Music(commands.Cog):
         try:
             await guild.voice_client.disconnect()
         except AttributeError:
-            print("AttributeError")
             pass
 
         try:
@@ -256,7 +255,7 @@ class Music(commands.Cog):
         if not vc:
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
 
-        await self.cleanup(ctx.guild)
+        await vc.disconnect()
 
     @commands.command(name='play', aliases=['sing'])
     async def play_(self, ctx, *, search: str):
