@@ -107,7 +107,7 @@ def run_discord_bot():
                 channels.append(bot.get_channel(channel.id))
         
         # Get quotes for all channels
-        await get_quote(channels, True)
+        await get_quote(channels, False)
 
     # On message
     @bot.listen()
