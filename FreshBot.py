@@ -131,7 +131,7 @@ def run_discord_bot():
         if message.author == bot.user:
             return
         print(get_time_format(12))
-        print(f"\n{username} said: \n'{user_message}' ({channel})")
+        print(f"{username} said: \n'{user_message}' ({channel})")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)

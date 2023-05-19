@@ -171,6 +171,10 @@ class Music(commands.Cog):
         self.bot = bot
         self.players = {}
 
+    # Command Error handling
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        print("Music Cog Error: \n", error, "\n")
+
     async def cleanup(self, guild):
         try:
             await guild.voice_client.disconnect()

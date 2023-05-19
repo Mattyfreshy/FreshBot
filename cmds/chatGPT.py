@@ -11,6 +11,10 @@ class ChatGPT(commands.Cog):
         openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
     
+    # Command Error handling
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        print("ChatGPT Cog Error: \n", error, "\n")
+    
     # Send message to channel depending on if chatbot is enabled
     async def send_message(self, ctx, message):
         """ Send message to channel depending on if chatbot is enabled """

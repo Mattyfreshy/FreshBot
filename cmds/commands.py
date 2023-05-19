@@ -1,11 +1,17 @@
 import discord
 from discord.ext import commands
 import random
+
+from discord.ext.commands.context import Context
 import trading as td
 
 class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    # Command Error handling
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        print("Commands Cog Error: \n", error, "\n")
 
     # Clear num messages
     @commands.guild_only()
