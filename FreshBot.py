@@ -81,6 +81,9 @@ def run_discord_bot():
         for filename in os.listdir('./cmds'):
             if filename.endswith('.py'):
                 await bot.load_extension(f'cmds.{filename[:-3]}')
+
+        # Update playing status
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
         
         # Bot Running
         print(f'{bot.user} is now running!')
