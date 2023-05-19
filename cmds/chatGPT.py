@@ -4,24 +4,40 @@ import openai
 from flask import Flask, redirect, render_template, request, url_for
 
 
-# Load environment variables
-ENABLED = False
+# Enable or Disable chatbot features
+ENABLED = True
 
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
+        openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
 
     async def send_message(self, ctx, message):
         if ENABLED:
             await ctx.send(message)
         else:
-            await ctx.send("This feature is currently disabled.")
+            await ctx.send("This feature is currently in works.")
 
-    # Say something
-    @commands.command(name='say')
-    async def say(self, ctx, *, message):
-        """ Say something """
-        await self.send_message(ctx, message)
+    # Get response from GPT API
+    async def get_response(self, message):
+        try:
+            response = openai.Completion.create(
+                engine="davinci",
+                prompt=message,
+                temperature=0.9,
+                max_tokens=150,
+                presence_penalty=0.6,
+            )
+            return response.choices[0].text
+        except Exception as e:
+            print(e)
+            return "Error getting response"
+
+    # Ask something
+    @commands.command(name='ask')
+    async def ask(self, ctx, *, message):
+        """ Ask the bot something """
+        await self.send_message(ctx, self.get_response(message))
         
 
 async def setup(bot):

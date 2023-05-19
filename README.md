@@ -2,7 +2,7 @@
 
 Current implementation is in FreshBot.py and is a work in progress.  
 Main commands are in commands.py.  
-ChatGPT in chatGPT.py is a chatBot that will eventually be supported.  
+ChatGPT in chatGPT.py is a chatBot that is in the works.  
 music.py is sourced and is currently not my work. Its used for learning purposes and will be modified.  
 
 ## Updates
