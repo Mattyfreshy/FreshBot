@@ -29,8 +29,8 @@ async def send_message(message, user_message, is_private, trigger):
         print(e)
 
 # Sends stock quote every minute
-async def get_quote(channels):
-    while True:
+async def get_quote(channels, enabled):
+    while enabled:
         # Variables
         delay = 15 # seconds
         date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
@@ -104,7 +104,7 @@ def run_discord_bot():
                 channels.append(bot.get_channel(channel.id))
         
         # Get quotes for all channels
-        await get_quote(channels)
+        await get_quote(channels, True)
 
     # On message
     @bot.listen()

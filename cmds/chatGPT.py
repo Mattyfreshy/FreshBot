@@ -17,6 +17,7 @@ class ChatGPT(commands.Cog):
     
     # Send message to channel depending on if chatbot is enabled
     async def send_message(self, ctx, message):
+        """ Send message to channel depending on if chatbot is enabled """
         if ENABLED:
             await ctx.send(message)
         else:
@@ -24,9 +25,10 @@ class ChatGPT(commands.Cog):
 
     # Get response from GPT API
     async def get_response(self, message):
+        """ Get response from GPT API"""
         try:
             response = openai.Completion.create(
-                engine="davinci",
+                engine="text-davinci-003",
                 prompt=message,
                 temperature=0.9,
                 max_tokens=150,
