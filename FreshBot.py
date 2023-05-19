@@ -11,11 +11,11 @@ load_dotenv()
 
 def get_prefix(client, message):
     # Public triggers
-    prefixes = ['!', '?', '.']
+    prefixes = ['!', '?', '.', '$']
     
     # Private triggers
     if not message.guild:
-        return '$'
+        return '!'
 
     # If in guild allow for users to mention bot
     return commands.when_mentioned_or(*prefixes)(client, message)
