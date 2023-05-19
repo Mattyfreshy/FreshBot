@@ -65,7 +65,6 @@ async def get_quote(channel):
     # Stop quote
     print("Stock Market Closed")
     print(dt.datetime.now().time())
-    await channel.send("Stock Market Closed")
     await asyncio.sleep(1)
         
 # Run discord bot
