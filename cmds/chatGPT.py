@@ -42,13 +42,18 @@ class ChatGPT(commands.Cog):
             print("chatGPT Error: ", e)
             return "Error getting response"
 
-    # Ask something
-    @commands.guild_only()
+    # Ask something (guild only)
+    # @commands.guild_only()
     @commands.command(name='ask')
     async def ask(self, ctx, *, message):
         """ Ask the bot something """
         await self.send_message(ctx, await self.get_response(message))
         
+    # @commands.dm_only()
+    # @commands.command(name='query')
+    # async def ask(self, ctx, *, message):
+    #     """ Ask the bot something """
+    #     await self.send_message(ctx, await self.get_response(message))
 
 async def setup(bot):
     await bot.add_cog(ChatGPT(bot))
