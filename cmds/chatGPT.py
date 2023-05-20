@@ -7,6 +7,12 @@ import openai
 # Enable or Disable chatbot features
 ENABLED = True
 
+# ChatGPT parameters
+ENGINE = "text-davinci-003"
+TEMPERATURE = 0.9
+MAX_TOKENS = 150
+PRESENCE_PENALTY = 0.6
+
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
         # Load variables
@@ -31,11 +37,11 @@ class ChatGPT(commands.Cog):
         """ Get response from GPT API"""
         try:
             response = openai.Completion.create(
-                engine="text-davinci-003",
+                engine=ENGINE,
                 prompt=message,
-                temperature=0.9,
-                max_tokens=150,
-                presence_penalty=0.6,
+                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS,
+                presence_penalty=PRESENCE_PENALTY,
             )
             return response.choices[0].text
         except Exception as e:
