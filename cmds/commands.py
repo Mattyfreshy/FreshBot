@@ -15,7 +15,7 @@ class Commands(commands.Cog):
 
     # Clear num messages
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(administrator = True, manage_messages=True)
     @commands.command(name='purge')
     async def purge(self, ctx, amount=0):
         """ Purge [number] messages. (Admin only, Use at your own risk) """
@@ -27,7 +27,7 @@ class Commands(commands.Cog):
 
     # Clear all messages
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(administrator = True, manage_messages=True)
     @commands.command(name='purgeAll')
     async def purge_all(self, ctx):
         """ Purge all messages. (Admin only, Use at your own risk) """
