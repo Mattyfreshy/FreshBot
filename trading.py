@@ -3,6 +3,9 @@ import yfinance as yf
 import pandas_datareader.data as web
 import pandas as pd
 import datetime as dt
+import txt_dir as txt
+
+### Module of functions for obtaining stock data and returning them ###
 
 # Global variables
 SOURCE = 'yahoo'
@@ -29,8 +32,8 @@ def get_quote(tick) -> str:
 def get_stock_quotes():
     ticks = []
     summary = []
-    tickersEquity = read_tickers('tickersEquity.txt')
-    tickersETF = read_tickers('tickersETF.txt')
+    tickersEquity = read_tickers(txt.TICKERS_EQUITY)
+    tickersETF = read_tickers(txt.TICKERS_ETF)
     
     # Get stock data
     if len(tickersEquity) > 0:
