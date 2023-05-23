@@ -13,12 +13,12 @@ Algorithm:
     Buy:
     - Stock price >= SMA(50)
     - MACD crosses above signal line and MACD < 0
-    - RSI < 60
+    - RSI < 65
     
     Sell:
     - Stock price <= SMA(20)
     - MACD crosses below signal line and MACD > 0
-    - RSI > 40
+    - RSI > 35
 """
 
 # Main trading algorithm

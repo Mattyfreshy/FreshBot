@@ -8,7 +8,7 @@ import sys
 import traceback
 from async_timeout import timeout
 from functools import partial
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
 
 
 ytdlopts = {
