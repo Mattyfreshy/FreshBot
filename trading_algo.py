@@ -11,15 +11,14 @@ import txt_dir as txt
 """
 Algorithm:
     Buy:
-        - Stock price >= SMA(50)
-        - MACD crosses above signal line
-        - RSI < 60
-        
-        Sell:
-        - Stock price <= SMA(20)
-        - MACD crosses below signal line
-        - RSI > 40
-
+    - Stock price >= SMA(50)
+    - MACD crosses above signal line and MACD < 0
+    - RSI < 60
+    
+    Sell:
+    - Stock price <= SMA(20)
+    - MACD crosses below signal line and MACD > 0
+    - RSI > 40
 """
 
 # Main trading algorithm
