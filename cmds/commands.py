@@ -63,7 +63,7 @@ class Commands(commands.Cog):
     async def quote(self, ctx, stock):
         """ Get [stock] quote """
         try:
-            await ctx.send(round(float(td.get_quote(stock.upper())), 2))
+            await ctx.send(td.get_quote(stock.upper()))
         except Exception as e:
             print(e)
             await ctx.send('Error getting quote or quote does not exist')

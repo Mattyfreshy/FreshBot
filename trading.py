@@ -13,7 +13,12 @@ WEEK_START = TODAY - dt.timedelta(days=TODAY.weekday())
 # Read tickers from file and return list of tickers as strings
 def read_tickers(file) -> list:
     with open(file, 'r') as f:
-        return f.read().splitlines()
+        lst = []
+        for line in f:
+            if line.strip():
+                print(line)
+                lst.append(line.strip())
+        return lst
 
 # Get quote of single stock
 def get_quote(tick) -> str:
@@ -43,7 +48,7 @@ def get_stock_quotes():
     
 
 def main():
-
+    print(get_stock_quotes())
     return
 
     # Get stock data
