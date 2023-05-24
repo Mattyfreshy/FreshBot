@@ -286,7 +286,7 @@ class Music(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
-        await ctx.trigger_typing()
+        await ctx.typing()
         vc = ctx.voice_client
 
         if not vc:
@@ -350,22 +350,22 @@ class Music(commands.Cog):
         else:
             await ctx.send('There is no next song on the waiting list.')
 
-    # @commands.command(name='clear', aliases=['clr', 'empty'])
-    # async def clear_(self, ctx):
-    #     """Clears the queue."""
-    #     vc = ctx.voice_client
+    @commands.command(name='clear', aliases=['clr', 'empty'])
+    async def clear_(self, ctx):
+        """Clears the queue."""
+        vc = ctx.voice_client
 
-    #     if not vc or not vc.is_connected():
-    #         return await ctx.send('I am currently not in a channel!', delete_after=20)
+        if not vc or not vc.is_connected():
+            return await ctx.send('I am currently not in a channel!', delete_after=20)
 
-    #     if vc.is_paused():
-    #         pass
-    #     elif not vc.is_playing():
-    #         return await ctx.send('I am not currently playing anything!', delete_after=20)
+        if vc.is_paused():
+            pass
+        elif not vc.is_playing():
+            return await ctx.send('I am not currently playing anything!', delete_after=20)
 
-    #     vc.stop()
-    #     self.get_player(ctx).queue.clear()
-    #     await ctx.send(f'**`{ctx.author}`**: Cleared the queue!')
+        vc.stop()
+        self.get_player(ctx).queue = asyncio.Queue()
+        await ctx.send(f'**`{ctx.author}`**: Cleared the queue!')
 
     @commands.command(name='queue', aliases=['q', 'playlist'])
     async def queue_info(self, ctx):
@@ -377,7 +377,7 @@ class Music(commands.Cog):
 
         player = self.get_player(ctx)
         if player.queue.empty():
-            return await ctx.send('There are currently no more queued songs.')
+            return await ctx.send('There are currently no queued songs.')
 
         # Grab up to 5 entries from the queue...
         upcoming = list(itertools.islice(player.queue._queue, 0, 5))
