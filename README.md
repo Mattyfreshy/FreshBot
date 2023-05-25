@@ -12,6 +12,9 @@
 - Code has been converted from using discord.client to discord.bot for better functionality.  
 - responses.py is now redundant, but there for legacy reasons.  
 
+## Requirements
+- 
+
 ## Setup
 
 1. If you don’t have Python installed, [install it from here](https://www.python.org/downloads/).

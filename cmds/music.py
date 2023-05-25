@@ -55,6 +55,22 @@ class YTDLSource(discord.PCMVolumeTransformer):
         This is only useful when you are NOT downloading.
         """
         return self.__getattribute__(item)
+    
+    def create_embed(url, info):
+        title = info.get('title', None)
+        thumbnail = info.get('thumbnail', None)
+        duration = info.get('duration', None)
+
+        duration_minutes = int(duration / 60)
+        duration_seconds = int(duration % 60)
+        duration_formatted = "{:d}:{:02d}".format(duration_minutes, duration_seconds)
+        
+        embed = discord.Embed(description="", color=1412061)
+        embed.set_thumbnail(url=thumbnail)
+        embed.add_field(name="Song:", value=f"[{title}]({url})", inline=False)
+        embed.add_field(name="Song length:", value=duration_formatted, inline=False)
+
+        return embed
 
     @classmethod
     async def create_source(cls, ctx, search: str, *, loop, download=False):
@@ -64,10 +80,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if not "http" in search: #Checks whether the user provided a link or a name
             search_results = ytdl.extract_info(url=f"ytsearch:{search}", download=download)
             url = search_results['entries'][0]['webpage_url']
-        
+
         to_run = partial(ytdl.extract_info, url=url, download=download)
         data = await loop.run_in_executor(None, to_run)
         # data = to_run
+
+        embed = cls.create_embed(url, data)
+        await ctx.send(embed=embed)
 
         if 'entries' in data:
             # take first item from a playlist
@@ -181,6 +200,7 @@ class Music(commands.Cog):
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
         print("Music Cog Error: \n", error, "\n")
+        await ctx.send(error, delete_after=20)
 
     async def cleanup(self, guild):
         try:
@@ -222,14 +242,6 @@ class Music(commands.Cog):
             self.players[ctx.guild.id] = player
 
         return player
-
-    def create_embed(title, url, thumbnail, duration):
-        embed = discord.Embed(description="", color=1412061)
-        embed.set_thumbnail(url=thumbnail)
-        embed.add_field(name="I play:", value=f"[{title}]({url})", inline=False)
-        embed.add_field(name="Song length:", value=duration, inline=False)
-
-        return embed
 
     @commands.command(name='join', aliases=['connect'])
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
