@@ -288,7 +288,7 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
 
-    @commands.command(name='play', aliases=['sing'])
+    @commands.command(name='play', aliases=['sing'], delete_after=2)
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
