@@ -5,7 +5,10 @@ import pandas as pd
 import datetime as dt
 import txt_dir as txt
 
-### Module of functions for obtaining stock data and returning them ###
+""" 
+Module of functions for obtaining stock data and returning them 
+(For discord bot only)
+"""
 
 # Pandas settings/fixes. (pandas_datareader fix)
 yf.pdr_override()

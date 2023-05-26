@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
-from discord.ui import Button, View, button
 import FreshBot as fb
 
 import asyncio
@@ -249,8 +247,8 @@ class Music(commands.Cog):
 
         return player
 
-    @app_commands.command(name='join', aliases=['connect'])
-    async def connect_(self, interaction: discord.Interaction, *, channel: discord.VoiceChannel=None):
+    @commands.hybrid_command(name='join', aliases=['connect'])
+    async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
         """Connect to voice.
         Parameters
         ------------
@@ -261,11 +259,11 @@ class Music(commands.Cog):
         """
         if not channel:
             try:
-                channel = interaction.user.voice.channel
+                channel = ctx.author.voice.channel
             except AttributeError:
                 raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
 
-        vc = interaction.guild.voice_client
+        vc = ctx.voice_client
 
         if vc:
             if vc.channel.id == channel.id:
@@ -280,9 +278,9 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
-        await interaction.response.send_message(f'Connected to: **{channel}**', delete_after=20)
+        await ctx.send(f'Connected to: **{channel}**', delete_after=20)
 
-    @commands.command(name='leave', aliases=['disconnect'])
+    @commands.hybrid_command(name='leave', aliases=['disconnect'])
     async def leave_(self, ctx):
         """Disconnect from voice.
             This command also stops the music if it's playing.
@@ -294,7 +292,7 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
 
-    @commands.command(name='play', aliases=['sing'])
+    @commands.hybrid_command(name='play', aliases=['sing'])
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
@@ -321,7 +319,7 @@ class Music(commands.Cog):
         
         await player.queue.put(source)
 
-    @commands.command(name='pause')
+    @commands.hybrid_command(name='pause')
     async def pause_(self, ctx):
         """Pause the currently playing song."""
         vc = ctx.voice_client
@@ -336,7 +334,7 @@ class Music(commands.Cog):
         vc.pause()
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
-    @commands.command(name='resume')
+    @commands.hybrid_command(name='resume')
     async def resume_(self, ctx):
         """Resume the currently paused song."""
         vc = ctx.voice_client
@@ -349,7 +347,7 @@ class Music(commands.Cog):
         vc.resume()
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
-    @commands.command(name='skip')
+    @commands.hybrid_command(name='skip')
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
@@ -371,7 +369,7 @@ class Music(commands.Cog):
         else:
             await ctx.send('There is no next song on the waiting list.')
 
-    @commands.command(name='clear', aliases=['clr', 'empty'])
+    @commands.hybrid_command(name='clear', aliases=['clr', 'empty'])
     async def clear_(self, ctx):
         """Clears the queue."""
         vc = ctx.voice_client
@@ -388,7 +386,7 @@ class Music(commands.Cog):
         self.get_player(ctx).queue = asyncio.Queue()
         await ctx.send(f'**`{ctx.author}`**: Cleared the queue!')
 
-    @commands.command(name='queue', aliases=['q', 'playlist'])
+    @commands.hybrid_command(name='queue', aliases=['q', 'playlist'])
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
         vc = ctx.voice_client
@@ -408,7 +406,7 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
+    @commands.hybrid_command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
     async def now_playing_(self, ctx):
         """Display information about the currently playing song."""
         vc = ctx.voice_client
@@ -429,7 +427,7 @@ class Music(commands.Cog):
         player.np = await ctx.send(f'**Now Playing:** `{vc.source.title}` '
                                    f'requested by `{vc.source.requester}`')
 
-    @commands.command(name='volume', aliases=['vol'])
+    @commands.hybrid_command(name='volume', aliases=['vol'])
     async def change_volume(self, ctx, *, vol: float):
         """Change the player volume.
         Parameters
@@ -453,7 +451,7 @@ class Music(commands.Cog):
         player.volume = vol / 100
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
-    @commands.command(name='stop')
+    @commands.hybrid_command(name='stop')
     async def stop_(self, ctx):
         """Stop the currently playing song and destroy the player.
         !Warning!
