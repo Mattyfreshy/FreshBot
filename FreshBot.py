@@ -84,10 +84,14 @@ def run_discord_bot():
     help_command = commands.DefaultHelpCommand(no_category='Help')
     bot = commands.Bot(command_prefix=get_prefix, help_command=help_command , intents=intents)
 
+    # Ignore List
+    ignore = ['music_hybrid.py']
+
     # load extensions/cogs
     async def load():
         for filename in os.listdir('./cmds'):
-            if filename.endswith('.py'):
+            print(filename,filename in ignore)
+            if filename.endswith('.py') and not filename in ignore:
                 await bot.load_extension(f'cmds.{filename[:-3]}')
 
     # On ready
