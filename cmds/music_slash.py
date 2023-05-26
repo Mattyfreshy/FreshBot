@@ -131,7 +131,7 @@ class MusicPlayer():
         self.bot = ctx.client
         self._guild = ctx.guild
         self._channel = ctx.channel
-        self._cog = ctx.cog
+        # self._cog = ctx.cog
 
         self.queue = asyncio.Queue()
         self.next = asyncio.Event()
@@ -186,7 +186,7 @@ class MusicPlayer():
 
     def destroy(self, guild):
         """Disconnect and cleanup the player."""
-        return self.bot.loop.create_task(self._cog.cleanup(guild))
+        return self.bot.loop.create_task(Music.cleanup(guild))
 
 
 class Music(commands.Cog):
