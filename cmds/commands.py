@@ -14,32 +14,30 @@ class Commands(commands.Cog):
     async def on_ready(self): 
         print('Commands Cog is ready.')
 
-    # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        """ Command Error handling """
         print(fb.get_time_format(12))
         print("Commands Cog Error: \n", error, "\n")
         await ctx.reply(error, ephemeral=True)
 
-    # Defers response
-    async def defer_response(self, interaction: discord.Interaction, coroutine: asyncio.coroutines, response: str):
+    async def defer_response(self, interaction: discord.Interaction, coroutine: asyncio.coroutines, command: str, response: str):
+        """ Defers responses to get around 3 second response time limit """
         try:
-            print("Deferring '/' commands")
+            print(f'Deferring {command} command')
             await interaction.response.defer(ephemeral=True)
             await coroutine
             await interaction.followup.send(response)
         except Exception as e:
             print(e)
-            await interaction.response.send_message('Error executing, invalid parameters, or Missing permissions', ephemeral=True)
+            await interaction.response.send_message('Error deferring', ephemeral=True)
 
-    # Clear num messages
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator = True, manage_messages=True)
     @app_commands.command(name='delete')
     async def delete(self, interaction: discord.Interaction, amount: int=0):
         """ Delete [number] messages. (Admin only, Use at your own risk) """
-        await self.defer_response(interaction, interaction.channel.purge(limit=amount), f'Deleted {amount} messages')
+        await self.defer_response(interaction, interaction.channel.purge(limit=amount), 'delete', f'Deleted {amount} messages')
 
-    # Clear all messages
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator = True, manage_messages=True)
     @app_commands.command(name='purge')
@@ -48,7 +46,7 @@ class Commands(commands.Cog):
         limit = 0
         async for _ in interaction.channel.history(limit=None):
             limit += 1
-        await self.defer_response(interaction, interaction.channel.purge(limit=limit), f'Purged {limit} messages')
+        await self.defer_response(interaction, interaction.channel.purge(limit=limit), 'purge', f'Purged {limit} messages')
     
     @commands.hybrid_command(name='hello')
     async def hello(self, ctx: commands.Context):

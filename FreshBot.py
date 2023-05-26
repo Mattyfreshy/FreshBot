@@ -18,8 +18,12 @@ def get_prefix(client, message):
     # If in guild allow for users to mention bot
     return commands.when_mentioned_or(*prefixes)(client, message)
 
-# Return time in 12 or 24 hour format depending on user preference
 def get_time_format(format):
+    """ 
+    Return time format depending on user preference
+    - 12 hour (default) 
+    - 24 hour 
+    """
     if format == '12':
         return dt.datetime.now().strftime("%I:%M %p")
     elif format == '24':
@@ -27,8 +31,9 @@ def get_time_format(format):
     else:
         return dt.datetime.now().strftime("%I:%M %p")
 
-# Sends stock quote every minute
 async def get_quote(channels, enabled):
+    """ Send stock quote every minute """
+    
     while enabled:
         # Variables
         delay = 15 # seconds
@@ -77,8 +82,9 @@ async def get_quote(channels, enabled):
         # # await channel.send("Stock Market Closed")
         await asyncio.sleep(delay)
         
-# Run discord bot
 def run_discord_bot():
+    """ Run discord bot """
+
     intents = discord.Intents.default()
     intents.message_content = True
     help_command = commands.DefaultHelpCommand(no_category='Help')
@@ -90,7 +96,6 @@ def run_discord_bot():
     # load extensions/cogs
     async def load():
         for filename in os.listdir('./cmds'):
-            print(filename,filename in ignore)
             if filename.endswith('.py') and not filename in ignore:
                 await bot.load_extension(f'cmds.{filename[:-3]}')
 
