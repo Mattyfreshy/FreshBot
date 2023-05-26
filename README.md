@@ -15,7 +15,9 @@
 - responses.py is now redundant, but there for legacy reasons.  
 
 ## Requirements
-- 
+- Python  
+- All requirements in requirements.txt  
+- FFmpeg (This must be done manually as the requirements.txt has it, but will not work)  
 
 ## Setup
 

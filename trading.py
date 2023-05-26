@@ -7,6 +7,10 @@ import txt_dir as txt
 
 ### Module of functions for obtaining stock data and returning them ###
 
+# Pandas settings/fixes. (pandas_datareader fix)
+yf.pdr_override()
+pd.set_option('mode.chained_assignment', None)
+
 # Global variables
 SOURCE = 'yahoo'
 TODAY = dt.date.today()
@@ -19,7 +23,6 @@ def read_tickers(file) -> list:
         lst = []
         for line in f:
             if line.strip():
-                print(line)
                 lst.append(line.strip())
         return lst
 

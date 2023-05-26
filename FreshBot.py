@@ -1,5 +1,4 @@
-import os, discord, responses, asyncio
-from discord import app_commands
+import os, discord, asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 import trading as td
