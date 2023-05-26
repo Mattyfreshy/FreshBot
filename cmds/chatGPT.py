@@ -18,6 +18,10 @@ class ChatGPT(commands.Cog):
         # Load variables
         openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_ready(self): 
+        print('ChatGPT Cog is ready.')
     
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):

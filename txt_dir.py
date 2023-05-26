@@ -14,7 +14,6 @@ TICKERS_ETF = DIR + 'tickersETF.txt'
 TRADES = DIR + 'trades.txt'
 
 def main():
-    print(TICKERS_EQUITY)
     return
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord.interactions import Interaction
+from discord.ui import Button, View, button
 import FreshBot as fb
 
 import asyncio
@@ -27,7 +29,7 @@ ytdlopts = {
 ffmpegopts = {
     # Optimized for streaming
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -filter:a "volume=.25"'
+    'options': '-vn -filter:a "volume=.75"'
 }
 
 ytdl = YoutubeDL(ytdlopts)
@@ -85,7 +87,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, to_run)
         # data = to_run
 
-        embed = cls.create_embed(url, data)
+        embed = cls.create_embed(url=url, info=data)
         await ctx.send(embed=embed)
 
         if 'entries' in data:
@@ -196,11 +198,15 @@ class Music(commands.Cog):
         self.bot = bot
         self.players = {}
 
+    @commands.Cog.listener()
+    async def on_ready(self): 
+        print('Music Cog is ready.')
+
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
         print("Music Cog Error: \n", error, "\n")
-        await ctx.send(error, delete_after=20)
+        await ctx.reply(error, ephemeral=True)
 
     async def cleanup(self, guild):
         try:
@@ -288,7 +294,7 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
 
-    @commands.command(name='play', aliases=['sing'], delete_after=2)
+    @commands.command(name='play', aliases=['sing'])
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
@@ -300,6 +306,9 @@ class Music(commands.Cog):
         """
         await ctx.typing()
         vc = ctx.voice_client
+
+        # Purge last message (The play command)
+        # await ctx.channel.purge(limit=1)
 
         if not vc:
             await ctx.invoke(self.connect_)        
@@ -456,6 +465,17 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently playing anything!', delete_after=20)
 
         await self.cleanup(ctx.guild)
+
+# class buttons(View):
+#     def __init__(self):
+#         super().__init__(timeout=None)
+#         self.value = None
+
+#     @button(label='Play', style=discord.ButtonStyle.green)
+#     async def play(self, button: Button, interaction: Interaction):
+#         self.value = True
+
+#         await interaction.response.edit_message(view=self)
 
 
 async def setup(bot):

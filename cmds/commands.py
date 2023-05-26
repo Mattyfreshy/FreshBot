@@ -1,72 +1,83 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
+import asyncio
 import FreshBot as fb
 import random
 import trading as td
 
 class Commands(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_ready(self): 
+        print('Commands Cog is ready.')
 
     # Command Error handling
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
         print("Commands Cog Error: \n", error, "\n")
+        await ctx.reply(error, ephemeral=True)
 
     # Clear num messages
-    @commands.guild_only()
-    @commands.has_permissions(administrator = True, manage_messages=True)
-    @commands.command(name='purge')
-    async def purge(self, ctx, amount=0):
-        """ Purge [number] messages. (Admin only, Use at your own risk) """
+    @app_commands.guild_only()
+    @app_commands.default_permissions(administrator = True, manage_messages=True)
+    @app_commands.command(name='delete')
+    async def purge(self, interaction: discord.Interaction, amount: int=0):
+        """ Delete [number] messages. (Admin only, Use at your own risk) """
         try:
-            await ctx.channel.purge(limit=amount + 1)
+            await interaction.response.defer(ephemeral=True)
+            await interaction.channel.purge(limit=amount)
+            await interaction.followup.send(f'Deleted {amount} messages')
         except Exception as e:
             print(e)
-            await ctx.send('Missing permissions or invalid number of messages')
+            await interaction.response.send_message('Missing permissions or invalid number of messages', ephemeral=True)
 
     # Clear all messages
-    @commands.guild_only()
-    @commands.has_permissions(administrator = True, manage_messages=True)
-    @commands.command(name='purgeAll')
-    async def purge_all(self, ctx):
+    @app_commands.guild_only()
+    @app_commands.default_permissions(administrator = True, manage_messages=True)
+    @app_commands.command(name='purge')
+    async def purge_all(self, interaction: discord.Interaction):
         """ Purge all messages. (Admin only, Use at your own risk) """
         try:
+            await interaction.response.defer(ephemeral=True)
             limit = 0
-            async for _ in ctx.channel.history(limit=None):
+            async for _ in interaction.channel.history(limit=None):
                 limit += 1
-            await ctx.channel.purge(limit=limit)
+            await interaction.channel.purge(limit=limit)
+            await interaction.followup.send(f'Purged {limit} messages', ephemeral=True)
         except Exception as e:
             print(e)
-            await ctx.send('Missing permissions')
+            await interaction.response.send_message('Missing permissions', ephemeral=True)
 
-    @commands.command(name='hello')
-    async def hello(self, ctx):
+    @app_commands.command(name='hello')
+    async def hello(self, interaction: discord.Interaction):
         """ Howdy """
-        await ctx.send('Rise and shine Barbie, its gona be a good day!')
+        await interaction.response.send_message('Rise and shine Barbie, its gona be a good day!')
     
-    @commands.command(name='roll')
-    async def roll(self, ctx): 
+    @app_commands.command(name='roll')
+    async def roll(self, interaction: discord.Interaction): 
         """ Roll a Dice """
-        await ctx.send(str(random.randint(1,6)))
+        await interaction.response.send_message(str(random.randint(1,6)))
 
-    @commands.command(name='random')
-    async def random(self, ctx, lower, upper):
+    @app_commands.command(name='random')
+    async def random(self, interaction: discord.Interaction, lower: int, upper: int):
         """ Get a random number [min] [max] """
         try:
-            await ctx.send(str(random.randint(int(lower), int(upper))))
+            await interaction.response.send_message(str(random.randint(int(lower), int(upper))))
         except Exception as e:
             print(e)
-            await ctx.send('Error getting random number')
+            await interaction.response.send_message('Error getting random number', ephemeral=True)
     
-    @commands.command(name='quote')
-    async def quote(self, ctx, stock):
+    @app_commands.command(name='quote')
+    async def quote(self, interaction: discord.Interaction , stock: str):
         """ Get [stock] quote """
         try:
-            await ctx.send(td.get_quote(stock.upper()))
+            await interaction.response.send_message(td.get_quote(stock.upper()))
         except Exception as e:
             print(e)
-            await ctx.send('Error getting quote or quote does not exist')
+            await interaction.response.send_message('Error getting quote or quote does not exist', ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(Commands(bot))

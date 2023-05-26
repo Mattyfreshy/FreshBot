@@ -1,4 +1,5 @@
 import os, discord, responses, asyncio
+from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 import trading as td
@@ -26,14 +27,6 @@ def get_time_format(format):
         return dt.datetime.now().strftime("%H:%M")
     else:
         return dt.datetime.now().strftime("%I:%M %p")
-    
-# Sends message from responses.py based on user message
-async def send_message(message, user_message, is_private, trigger):
-    try:
-        response = await responses.handle_responses(user_message, trigger)
-        await message.author.send(response) if is_private else await message.channel.send(response)
-    except Exception as e:
-        print(e)
 
 # Sends stock quote every minute
 async def get_quote(channels, enabled):
@@ -92,13 +85,24 @@ def run_discord_bot():
     help_command = commands.DefaultHelpCommand(no_category='Help')
     bot = commands.Bot(command_prefix=get_prefix, help_command=help_command , intents=intents)
 
+    # load extensions/cogs
+    async def load():
+        for filename in os.listdir('./cmds'):
+            if filename.endswith('.py'):
+                await bot.load_extension(f'cmds.{filename[:-3]}')
+
     # On ready
     @bot.event
     async def on_ready():
         # Load extensions
-        for filename in os.listdir('./cmds'):
-            if filename.endswith('.py'):
-                await bot.load_extension(f'cmds.{filename[:-3]}')
+        await load()
+
+        # Load slash commands. Global sync.
+        try:
+            synced = await bot.tree.sync()
+            print(f"Synced {len(synced)} commands/n")
+        except Exception as e:
+            print(e)
 
         # Update playing status
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
