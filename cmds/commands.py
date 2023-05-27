@@ -36,7 +36,8 @@ class Commands(commands.Cog):
     @app_commands.command(name='delete')
     async def delete(self, interaction: discord.Interaction, amount: int=0):
         """ Delete [number] messages. (Admin only, Use at your own risk) """
-        await self.defer_response(interaction, interaction.channel.purge(limit=amount), 'delete', f'Deleted {amount} messages')
+        coroutine = interaction.channel.purge(limit=amount)
+        await self.defer_response(interaction, coroutine=coroutine, command='delete', response=f'Deleted {amount} messages')
 
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator = True, manage_messages=True)
@@ -46,7 +47,8 @@ class Commands(commands.Cog):
         limit = 0
         async for _ in interaction.channel.history(limit=None):
             limit += 1
-        await self.defer_response(interaction, interaction.channel.purge(limit=limit), 'purge', f'Purged {limit} messages')
+        coroutine = interaction.channel.purge(limit=limit)
+        await self.defer_response(interaction, coroutine=coroutine, command='purge', response=f'Purged {limit} messages')
     
     @commands.hybrid_command(name='hello')
     async def hello(self, ctx: commands.Context):

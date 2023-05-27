@@ -257,7 +257,7 @@ class Music(commands.Cog):
         return player
     
     async def defer_response(self, interaction: discord.Interaction, coroutine: asyncio.coroutines, command: str, response: str):
-        """ Defers responses to get around 3 second response time limit """
+        """ Defers responses to get around 3 second response time limit."""
         try:
             print(f'Deferring {command} command')
             await interaction.response.defer(ephemeral=True)
@@ -300,7 +300,9 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
-        await interaction.response.send_message(f'Connected to: **{channel}**')
+        # Indicate connection if not already connected
+        if not vc:
+            await interaction.response.send_message(f'Connected to: **{channel}**')
 
     @app_commands.command(name='join')
     async def join_(self, interaction: discord.Interaction, *, channel: discord.VoiceChannel=None):
@@ -322,7 +324,7 @@ class Music(commands.Cog):
 
     @app_commands.command(name='play')
     async def play_(self, interaction: discord.Interaction, *, search: str):
-        """Request a song and add it to the queue. """
+        """Request a song and add it to the queue."""
         """
         This command attempts to join a valid voice channel if the bot is not already in one.
         Uses YTDL to automatically search and retrieve a song.
@@ -331,10 +333,7 @@ class Music(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
-        vc = interaction.guild.voice_client
-        if not vc:
-            await self.connect_(interaction)
-
+        # Create source and add it to the queue
         player = self.get_player(interaction)
 
         # If download is False, source will be a dict which will be used later to regather the stream.
@@ -342,22 +341,28 @@ class Music(commands.Cog):
         try:
             source = await YTDLSource.create_source(interaction, search, download=False)
             await player.queue.put(source)
-        except Exception:
+        except Exception as e:
+            # await interaction.followup.edit_message(f'Error processing request: {search}')
             print(f'Error processing request: {search}')
+            print(e)
             pass
+        
+        # Connect to voice if not already connected
+        vc = interaction.guild.voice_client
+        if not vc:
+            await self.connect_(interaction)
 
     @app_commands.command(name='pause')
     async def pause_(self, interaction: discord.Interaction):
         """Pause the currently playing song."""
         vc = interaction.guild.voice_client
-        print(vc.is_playing())
         if not vc or not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         elif vc.is_paused():
             return
 
         vc.pause()
-        await interaction.send(f'**{vc.source.requester}**: Paused the song!')
+        await interaction.response.send_message(f'**{vc.source.requester}**: Paused the song!')
 
     @app_commands.command(name='resume')
     async def resume_(self, interaction: discord.Interaction):
@@ -367,10 +372,10 @@ class Music(commands.Cog):
         if not vc or not vc.is_connected():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         elif not vc.is_paused():
-            return
+            return await interaction.response.send_message('I am not paused!', delete_after=20)
 
         vc.resume()
-        await interaction.response.send_message(f'**`{vc.source.requester}`**: Resumed the song!')
+        await interaction.response.send_message(f'**{vc.source.requester}**: Resumed the song!')
 
     @app_commands.command(name='skip')
     async def skip_(self, interaction: discord.Interaction):
@@ -446,7 +451,8 @@ class Music(commands.Cog):
 
     @app_commands.command(name='volume')
     async def change_volume(self, interaction: discord.Interaction, *, vol: float):
-        """Change the player volume.
+        """Change the player volume."""
+        """
         Parameters
         ------------
         volume: float or int [Required]
@@ -470,7 +476,8 @@ class Music(commands.Cog):
 
     @app_commands.command(name='stop')
     async def stop_(self, interaction: discord.Interaction):
-        """Stop the currently playing song and destroy the player.
+        """Stop the currently playing song and destroy the player."""
+        """
         !Warning!
             This will destroy the player assigned to your guild, also deleting any queued songs and settings.
         """
@@ -480,6 +487,7 @@ class Music(commands.Cog):
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
 
         await self.cleanup(interaction.guild)
+        await interaction.response.send_message('**Music player cleared and disconnected.**')
 
 # class buttons(View):
 #     def __init__(self):
