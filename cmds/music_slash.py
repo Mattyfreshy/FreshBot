@@ -301,6 +301,7 @@ class Music(commands.Cog):
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
         # Indicate connection if not already connected
+        vc = interaction.guild.voice_client # Get updated voice client
         if not vc:
             await interaction.response.send_message(f'Connected to: **{channel}**')
 
@@ -391,9 +392,8 @@ class Music(commands.Cog):
         vc.stop()
         queue = self.get_player(interaction=interaction).queue
         if not queue.empty(): #Checks if there is a track in the queue
-            await interaction.response.send_message(f'**{vc.source.requester}**: Skipped the song!')
-            next_song = await queue.get()
-            await self.play_(interaction, next_song)
+            await interaction.response.send_message(f'**{YTDLSource.discord_requester(interaction=interaction)}**: Skipped the song!')
+            await queue.get()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')
 
@@ -410,7 +410,6 @@ class Music(commands.Cog):
         elif not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
 
-        vc.stop()
         self.get_player(interaction=interaction).queue = asyncio.Queue()
         await interaction.response.send_message(f'**{vc.source.requester}**: Cleared the queue!')
 
@@ -487,7 +486,7 @@ class Music(commands.Cog):
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
 
         await self.cleanup(interaction.guild)
-        await interaction.response.send_message('**Music player cleared and disconnected.**')
+        await interaction.response.send_message('**Music player cleared and disconnected.**', delete_after=20)
 
 # class buttons(View):
 #     def __init__(self):
