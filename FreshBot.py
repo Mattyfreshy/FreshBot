@@ -33,7 +33,7 @@ def get_time_format(format):
 
 async def get_quote(channels, enabled):
     """ Send stock quote every minute """
-    
+
     while enabled:
         # Variables
         delay = 15 # seconds
@@ -113,7 +113,7 @@ def run_discord_bot():
             print(e)
 
         # Update playing status
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="!help"))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="None"))
         
         # Bot Running
         print(get_time_format(12))
