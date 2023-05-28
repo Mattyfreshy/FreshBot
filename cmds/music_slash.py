@@ -343,7 +343,7 @@ class Music(commands.Cog):
             source = await YTDLSource.create_source(interaction, search, download=False)
             await player.queue.put(source)
         except Exception as e:
-            # await interaction.followup.edit_message(f'Error processing request: {search}')
+            await interaction.response.send_message(f'Error processing request: {search}')
             print(f'Error processing request: {search}')
             print(e)
             pass
@@ -387,7 +387,7 @@ class Music(commands.Cog):
             return await interaction.response.send_message('I am currently not in a channel!', delete_after=20)
 
         if not vc.is_playing():
-            return await interaction.send('I am not currently playing anything!', delete_after=20)
+            return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
 
         vc.stop()
         queue = self.get_player(interaction=interaction).queue

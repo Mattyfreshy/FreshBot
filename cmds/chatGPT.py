@@ -34,7 +34,7 @@ class ChatGPT(commands.Cog):
         if ENABLED:
             await ctx.send(message)
         else:
-            await ctx.send("This feature is currently in works.")
+            await ctx.send("Chatbot is disabled.")
 
     # Get response from GPT API
     async def get_response(self, message):
@@ -54,7 +54,7 @@ class ChatGPT(commands.Cog):
 
     # Ask something (guild only)
     # @commands.guild_only()
-    @commands.hybrid_command(name='ask')
+    @commands.command(name='ask')
     async def ask(self, ctx, *, message):
         """ Ask the bot something """
         await self.send_message(ctx, await self.get_response(message))

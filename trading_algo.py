@@ -48,8 +48,27 @@ def read_tickers(file) -> list:
                 lst.append(line.strip())
         return lst
     
-def get_rsi(df, n=14):
+def get_sma(stock: str, delta_days=50):
+    """ Calculate n_Day SMA (Default 50) """
+    """ Uses 1m interval data for extreme accuracy """
+    now = dt.datetime.now()
+    n_days_ago = now - dt.timedelta(days=delta_days)
+    start_year = n_days_ago.year
+    start_month = n_days_ago.month
+    start_day = n_days_ago.day
+    start = dt.datetime(start_year, start_month, start_day)
+
+    # Get stock close data
+    df = get_stock_data(stock,start,now,'15m')
+    df = df[['Close']]
+    print(df)
+
+    return
+
+def get_rsi(df, delta_days=14):
     """ Calculate 14_Day RSI """
+    now = dt.datetime.now()
+    n_days_ago = now - dt.timedelta(days=delta_days)
     return
 
 def get_MCAD(df):
@@ -58,7 +77,7 @@ def get_MCAD(df):
 
 def get_stock_data(stock,start_date,end_date,interval):
         """ 
-        Get stock data from yahoo finance using yfinance.
+        Get stock close data from yahoo finance using yfinance.
         - Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
         - Intraday data cannot extend last 60 days.
 
@@ -68,9 +87,12 @@ def get_stock_data(stock,start_date,end_date,interval):
         df.reset_index(inplace=True) 
 
         # Re-parse datetime if interval is less than 1 day
-        if interval[-1] == 'm':
-            df["Datetime"] = pd.to_datetime(df["Datetime"]).dt.strftime('%Y-%m-%d %H:%M:%S')
-        # df['date'] = df['Date'].dt.date
+        try:
+            if interval[-1] == 'm':
+                df["Datetime"] = pd.to_datetime(df["Datetime"]).dt.strftime('%m-%d-%Y %I:%M:%S %p')
+        except:
+            print("Error parsing datetime: Might be day's stock market is closed.")
+            pass
       
         return df
 
@@ -102,22 +124,24 @@ def freshbot_trading():
 def main():
     """ Testing Stage """
 
-    ticker = read_tickers(txt.TICKERS_EQUITY)
-    # ticker = 'AAPL'
-    # Last 3 years closing prices starting from Jan 2, 2018.
+    # ticker = read_tickers(txt.TICKERS_EQUITY)
+    # # ticker = 'AAPL'
+    # # Last 3 years closing prices starting from Jan 2, 2018.
     
-    now = dt.datetime.now()
-    delta_days = 0
-    n_days_ago = now - dt.timedelta(days=delta_days)
+    # now = dt.datetime.now()
+    # delta_days = 3
+    # n_days_ago = now - dt.timedelta(days=delta_days)
 
-    start_year = n_days_ago.year
-    start_month = n_days_ago.month
-    start_day = n_days_ago.day
-    start = dt.datetime(start_year, start_month, start_day)
+    # start_year = n_days_ago.year
+    # start_month = n_days_ago.month
+    # start_day = n_days_ago.day
+    # start = dt.datetime(start_year, start_month, start_day)
 
-    # yfinance
-    df = get_stock_data('AAPl',start,now,'1m')
-    print(df)
+    # # yfinance
+    # df = get_stock_data('AAPl',start,now,'1m')
+    # print(df)
+
+    get_sma('AAPL', delta_days=50)
     return    
 
 if __name__ == '__main__':
