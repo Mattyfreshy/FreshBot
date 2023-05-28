@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import Button, View, button
 import FreshBot as fb
+import json
 
 import asyncio
 import itertools
@@ -31,7 +32,7 @@ ytdlopts = {
 ffmpegopts = {
     # Optimized for streaming
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -filter:a "volume=.75"'
+    'options': '-vn -filter:a "volume=1.0"'
 }
 
 ytdl = YoutubeDL(ytdlopts)
@@ -53,6 +54,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         self.title = data.get('title')
         self.web_url = data.get('webpage_url')
+        self.data = data
 
     def __getitem__(self, item: str):
         """Allows us to access attributes similar to a dict.
@@ -68,15 +70,19 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return f'{mention}'
         
     
-    def create_embed(url, info):
+    async def create_embed(url, info, header):
         """Creates an embed for the current song"""
         is_playlist = 'playlist?list=' in url
         title = info.get('title', None)
         thumbnail = info.get('thumbnails' if is_playlist else 'thumbnail', None)
+
+        # If the thumbnail is a list, get the first element 'url' from it
+        if isinstance(thumbnail, list) and 'url' in thumbnail[0]:
+            thumbnail = thumbnail[0]['url']
         
         embed = discord.Embed(description="", color=1412061)
-        embed.set_thumbnail(url=thumbnail[0])
-        embed.add_field(name="Added to queue:", value=f"[{title}]({url})", inline=False)
+        embed.set_thumbnail(url=thumbnail)
+        embed.add_field(name=header, value=f"[{title}]({url})", inline=False)
 
         if not is_playlist:
             duration = info.get('duration', None)
@@ -104,23 +110,32 @@ class YTDLSource(discord.PCMVolumeTransformer):
             print(e)
             return
 
-        # print(data)
-        embed = cls.create_embed(url=url, info=data)
-        searching = f'Searching ```{search}```\n'
-        added_to_queue = '```ini[Added {data["title"]} to the Queue.]\n```'
-        await interaction.response.send_message(embed=embed)
-
-        if 'entries' in data:
-            for entry in data['entries']:
-                link = "https://www.youtube.com/watch?v={}".format(entry['id'])
-                # print(link)
+        is_playlist = 'playlist?list=' in url
+        header = f"Added {'playlist' if 'playlist?list=' in url else 'song'} to queue:"
+        await interaction.response.defer(thinking=True)
+        embed = await cls.create_embed(url=url, info=data, header=header)
+        await interaction.followup.send(embed=embed)
     
-        if download:
-            source = ytdl.prepare_filename(data)
+        # Due to dict formatting, we need get entries from playlist
+        is_playlist = 'playlist?list=' in url
+        if is_playlist:
+            data = data['entries']
         else:
-            return {'webpage_url': data['webpage_url'], 'requester': cls.discord_requester(interaction=interaction), 'title': data['title']}
+            data = [data]
+        
+        source_entries = []
+        if download:
+            for entries in data:
+                source_entries.append(ytdl.prepare_filename(entries))
 
-        return cls(discord.FFmpegPCMAudio(source, **ffmpegopts), data=data, requester=cls.discord_requester(interaction=interaction))
+            audio_sources = []
+            for song, source in zip(data, source_entries):
+                audio_sources.append(cls(discord.FFmpegPCMAudio(source, **ffmpegopts), data=song, requester=cls.discord_requester(interaction=interaction)))
+            return audio_sources
+        else:
+            for song in data:
+                source_entries.append(song | {'webpage_url': song['url' if is_playlist else 'webpage_url'], 'requester': cls.discord_requester(interaction=interaction)})
+        return source_entries
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
@@ -360,9 +375,13 @@ class Music(commands.Cog):
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         try:
             source = await YTDLSource.create_source(interaction, search, loop=self.bot.loop, download=False)
-            await player.queue.put(source)
+            for entry in source:
+                await player.queue.put(entry)
         except Exception as e:
-            await interaction.response.send_message(f'Error processing request: {search}')
+            try:
+                await interaction.response.send_message(f'Error processing request: {search}')
+            except:
+                await interaction.followup.send_message(f'Error processing request: {search}')
             print(f'Error processing request: {search}')
             print(e)
         
@@ -446,6 +465,26 @@ class Music(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
+    @app_commands.command(name='queue_all')
+    async def queue_info(self, interaction: discord.Interaction):
+        """Retrieve a basic queue of upcoming songs."""
+        vc = interaction.guild.voice_client
+
+        if not vc or not vc.is_connected():
+            return await interaction.response.send_message('I am not currently connected to voice!', delete_after=20)
+
+        player = self.get_player(interaction=interaction)
+        if player.queue.empty():
+            return await interaction.response.send_message('There are currently no queued songs.')
+
+        # Grab all entries from the queue...
+        upcoming = list(itertools.islice(player.queue._queue))
+
+        fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
+        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
+
+        await interaction.response.send_message(embed=embed)
+
     @app_commands.command(name='now_playing')
     async def now_playing_(self, interaction: discord.Interaction):
         """Display information about the currently playing song."""
@@ -458,8 +497,9 @@ class Music(commands.Cog):
         if not player.current:
             return await interaction.response.send_message('I am not currently playing anything!')
 
-        player.np = await interaction.response.send_message(f'**Now Playing:** `{vc.source.title}` '
-                                   f'requested by {vc.source.requester}')
+        header = f'**Now Playing:** Requested by {vc.source.requester}'
+        embed = await YTDLSource.create_embed(url=vc.source.web_url, info=vc.source.data, header=header)
+        player.np = await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='volume')
     async def change_volume(self, interaction: discord.Interaction, *, vol: float):
