@@ -10,21 +10,6 @@ import pandas as pd
 import pandas_datareader as pdr
 
 
-
-""" Fresh Trading Algorithm Overview """
-"""
-Algorithm:
-    Buy:
-    - Stock price >= SMA(50)
-    - MACD crosses above signal line and MACD < 0
-    - RSI < 65
-    
-    Sell:
-    - Stock price <= SMA(20)
-    - MACD crosses below signal line and MACD > 0
-    - RSI > 35
-"""
-
 # Pandas settings/fixes. (pandas_datareader fix)
 yf.pdr_override()
 pd.set_option('mode.chained_assignment', None)
@@ -142,13 +127,38 @@ def freshbot_trading():
     Fresh trading algorithm:
         Uses sma(50), MACD, and RSI to determine buy/sell signals.
         Uses 1 minute interval data.
+
+    Algorithm:
+        Buy:
+        - Stock price >= SMA(50)
+        - MACD crosses above signal line and MACD < 0
+        - RSI < 65
+        
+        Sell:
+        - Stock price <= SMA(20)
+        - MACD crosses below signal line and MACD > 0
+        - RSI > 35
     """
     # Get stock data
     stocks = read_tickers(txt.TICKERS_EQUITY)
 
     market_open = marketStatus()
     while market_open:
+        # Buy status variable
+        buy = False
 
+        
+        # Algorithm
+        if buy:
+            # Stock already bought
+            # Sell if conditions are met
+            
+            pass
+        else:
+            # Stock not bought
+            # Buy if conditions are met
+
+            pass
 
 
         # Delay between each iteration
