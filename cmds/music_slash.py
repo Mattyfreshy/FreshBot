@@ -346,7 +346,6 @@ class Music(commands.Cog):
             await interaction.response.send_message(f'Error processing request: {search}')
             print(f'Error processing request: {search}')
             print(e)
-            pass
         
         # Connect to voice if not already connected
         vc = interaction.guild.voice_client

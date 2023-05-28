@@ -1,11 +1,14 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import math
-import asyncio
-import yfinance as yf
-import pandas as pd
 import datetime as dt
 import txt_dir as txt
+import math
+import asyncio
+
+import matplotlib.pyplot as plt
+import numpy as np
+import yfinance as yf
+import pandas as pd
+import pandas_datareader as pdr
+
 
 
 """ Fresh Trading Algorithm Overview """
@@ -48,20 +51,55 @@ def read_tickers(file) -> list:
                 lst.append(line.strip())
         return lst
     
-def get_sma(stock: str, delta_days=50):
+def get_sma(stock: str, delta_days=SMA_50):
     """ Calculate n_Day SMA (Default 50) """
-    """ Uses 1m interval data for extreme accuracy """
-    now = dt.datetime.now()
-    n_days_ago = now - dt.timedelta(days=delta_days)
-    start_year = n_days_ago.year
-    start_month = n_days_ago.month
-    start_day = n_days_ago.day
-    start = dt.datetime(start_year, start_month, start_day)
+    """ 
+    Simple Moving Average:
+        SMA = ( Sum ( Price, n ) ) / n    
+        Where: n = Time Period
+    Uses 1m interval data for extreme accuracy.
+    """
+    now = dt.datetime.now() # Current date
+    df_lst = [] # List of dataframes
+    timedelta_lst = [now] # List of timedelta objects
+    n_downloads = 8 # Number of downloads from yfinance
 
-    # Get stock close data
-    df = get_stock_data(stock,start,now,'15m')
-    df = df[['Close']]
-    print(df)
+    for i in range(n_downloads):
+        # Get timedelta object
+        timedelta_lst.append(timedelta_lst[-1] - dt.timedelta(days=6))
+    
+    # for time in timedelta_lst:
+    #     print(time) #* DEBUG
+
+    # Get df's from yfinance
+    for i in range(len(timedelta_lst)-1):
+        week_ago = timedelta_lst[i+1]
+        start_year = week_ago.year
+        start_month = week_ago.month
+        start_day = week_ago.day
+        start = dt.datetime(start_year, start_month, start_day)
+        print(start)    #* DEBUG
+        df_temp = get_stock_data(stock,start,timedelta_lst[i],'1m')
+        df_lst.append(df_temp)
+
+    
+    # n_weekdays_ago = now - dt.timedelta(days=delta_days)
+    # start_year = n_weekdays_ago.year
+    # start_month = n_weekdays_ago.month
+    # start_day = n_weekdays_ago.day
+    # start = dt.datetime(start_year, start_month, start_day)
+    # print(start)    #* DEBUG
+
+    # # Get stock close data
+    # df = get_stock_data(stock,start,now,'1m')
+    # print(df)   #* DEBUG
+    # df = df[['Close']]
+
+    # # Calculate SMA
+    # sum = df.sum()
+    # len = df.size
+    # sma = sum / len
+    # print(sma)  #* DEBUG
 
     return
 
@@ -75,11 +113,12 @@ def get_MCAD(df):
     """ Calculate the MACD and Signal Line indicators """
     return
 
+# MIGHT BE TERMINATED DUE TO YFINANCE LIBRARY BEING UNRELIABLE
 def get_stock_data(stock,start_date,end_date,interval):
         """ 
-        Get stock close data from yahoo finance using yfinance.
-        - Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
-        - Intraday data cannot extend last 60 days.
+        Get stock close data from yahoo finance using yfinance:
+            Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
+            Intraday data cannot extend last 60 days.
 
         Returns pandas dataframe.
         """
@@ -100,9 +139,9 @@ def get_stock_data(stock,start_date,end_date,interval):
 
 def freshbot_trading():
     """ 
-    Fresh trading algorithm.
-    - Uses sma(50), MACD, and RSI to determine buy/sell signals.
-    - Uses 1 minute interval data.
+    Fresh trading algorithm:
+        Uses sma(50), MACD, and RSI to determine buy/sell signals.
+        Uses 1 minute interval data.
     """
     # Get stock data
     stocks = read_tickers(txt.TICKERS_EQUITY)
@@ -137,11 +176,14 @@ def main():
     # start_day = n_days_ago.day
     # start = dt.datetime(start_year, start_month, start_day)
 
+    # # pandas_datareader
+    # df = pdr.get_data_yahoo(ticker, start, now)
+
     # # yfinance
     # df = get_stock_data('AAPl',start,now,'1m')
     # print(df)
 
-    get_sma('AAPL', delta_days=50)
+    get_sma('AAPL', delta_days=6)
     return    
 
 if __name__ == '__main__':
