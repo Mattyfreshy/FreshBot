@@ -23,7 +23,9 @@ ytdlopts = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0'  # ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
+    'extract_flat': 'in_playlist',
+    'skip_download': True
 }
 
 ffmpegopts = {
@@ -68,18 +70,20 @@ class YTDLSource(discord.PCMVolumeTransformer):
     
     def create_embed(url, info):
         """Creates an embed for the current song"""
+        is_playlist = 'playlist?list=' in url
         title = info.get('title', None)
-        thumbnail = info.get('thumbnail', None)
-        duration = info.get('duration', None)
-
-        duration_minutes = int(duration / 60)
-        duration_seconds = int(duration % 60)
-        duration_formatted = "{:d}:{:02d}".format(duration_minutes, duration_seconds)
+        thumbnail = info.get('thumbnails' if is_playlist else 'thumbnail', None)
         
         embed = discord.Embed(description="", color=1412061)
-        embed.set_thumbnail(url=thumbnail)
-        embed.add_field(name="Added song to queue:", value=f"[{title}]({url})", inline=False)
-        embed.add_field(name="Song length:", value=duration_formatted, inline=False)
+        embed.set_thumbnail(url=thumbnail[0])
+        embed.add_field(name="Added to queue:", value=f"[{title}]({url})", inline=False)
+
+        if not is_playlist:
+            duration = info.get('duration', None)
+            duration_minutes = int(duration / 60)
+            duration_seconds = int(duration % 60)
+            duration_formatted = "{:d}:{:02d}".format(duration_minutes, duration_seconds)
+            embed.add_field(name="Song length:", value=duration_formatted, inline=False)
 
         return embed
 
@@ -91,7 +95,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if not "http" in search: #Checks whether the user provided a link or a name
             search_results = ytdl.extract_info(url=f"ytsearch:{search}", download=download)
             url = search_results['entries'][0]['webpage_url']
-        print('debug 1')
+
         try:
             to_run = partial(ytdl.extract_info, url=url, download=download)
             data = await loop.run_in_executor(None, to_run)
@@ -100,15 +104,16 @@ class YTDLSource(discord.PCMVolumeTransformer):
             print(e)
             return
 
-        print("debug 3")
+        # print(data)
         embed = cls.create_embed(url=url, info=data)
         searching = f'Searching ```{search}```\n'
         added_to_queue = '```ini[Added {data["title"]} to the Queue.]\n```'
         await interaction.response.send_message(embed=embed)
 
         if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+            for entry in data['entries']:
+                link = "https://www.youtube.com/watch?v={}".format(entry['id'])
+                # print(link)
     
         if download:
             source = ytdl.prepare_filename(data)
@@ -287,30 +292,34 @@ class Music(commands.Cog):
                 channel = interaction.user.voice.channel
             except AttributeError:
                 await interaction.response.send_message('No channel to join. Please either specify a valid channel or join one.')
-                return
+                return False
                 # raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
 
         vc = interaction.guild.voice_client
 
         if vc:
             if vc.channel.id == channel.id:
-                return
+                return True
             try:
                 await vc.move_to(channel)
             except asyncio.TimeoutError:
-                raise VoiceConnectionError(f'Moving to channel: <{channel}> timed out.')
+                await interaction.response.send_message(f'Moving to channel: <{channel}> timed out.')
+                return False
         else:
             try:
                 await channel.connect()
             except asyncio.TimeoutError:
-                raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
+                await interaction.response.send_message(f'Connecting to channel: <{channel}> timed out.')
+                return False
+        return True
 
     @app_commands.command(name='join')
     async def join_(self, interaction: discord.Interaction, *, channel: discord.VoiceChannel=None):
         """Connect to voice. """
         await self.connect_(interaction, channel=channel)
         try:
-            channel = interaction.user.voice.channel
+            if not channel:
+                channel = interaction.user.voice.channel
             await interaction.response.send_message(f'Connected to: **{channel}**')
         except:
             pass
@@ -342,7 +351,8 @@ class Music(commands.Cog):
         # Connect to voice if not already connected
         vc = interaction.guild.voice_client
         if not vc:
-            await self.connect_(interaction)
+            if not await self.connect_(interaction):
+                return
         
         # Get player
         player = self.get_player(interaction)
