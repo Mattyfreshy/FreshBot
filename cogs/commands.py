@@ -35,7 +35,7 @@ class Commands(commands.Cog):
     @app_commands.default_permissions(administrator = True, manage_messages=True)
     @app_commands.command(name='delete')
     async def delete(self, interaction: discord.Interaction, amount: int=0):
-        """ Delete [number] messages. (Admin only, Use at your own risk) """
+        """ Delete [number] messages. (Use at your own risk) """
         coroutine = interaction.channel.purge(limit=amount)
         await self.defer_response(interaction, coroutine=coroutine, command='delete', response=f'Deleted {amount} messages')
 
@@ -43,7 +43,7 @@ class Commands(commands.Cog):
     @app_commands.default_permissions(administrator = True, manage_messages=True)
     @app_commands.command(name='purge')
     async def purge(self, interaction: discord.Interaction):
-        """ Purge all messages. (Admin only, Use at your own risk) """
+        """ Purge all messages. (Use at your own risk) """
         limit = 0
         async for _ in interaction.channel.history(limit=None):
             limit += 1

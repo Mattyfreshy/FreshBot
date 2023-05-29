@@ -32,7 +32,7 @@ ytdlopts = {
 ffmpegopts = {
     # Optimized for streaming
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -filter:a "volume=.75"'
+    'options': '-vn'
 }
 
 ytdl = YoutubeDL(ytdlopts)
@@ -68,8 +68,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         discriminator = interaction.user.discriminator
         mention = interaction.user.mention
         return f'{mention}'
-        
-    
+
     async def create_embed(url, info, header, vol):
         """Creates an embed for the current song"""
         is_playlist = 'playlist?list=' in url
@@ -102,7 +101,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         url = search
         if not "http" in search: #Checks whether the user provided a link or a name
             search_results = ytdl.extract_info(url=f"ytsearch:{search}", download=download)
-            url = search_results['entries'][0]['webpage_url']
+            url = search_results['entries'][0]['url']
 
         try:
             to_run = partial(ytdl.extract_info, url=url, download=download)
@@ -173,7 +172,7 @@ class MusicPlayer():
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
-        self.volume = .5
+        self.volume = 0.75
         self.current = None
 
         ctx.client.loop.create_task(self.player_loop())

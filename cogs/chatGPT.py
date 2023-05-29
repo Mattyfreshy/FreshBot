@@ -1,5 +1,6 @@
 import discord, os
 from discord.ext import commands
+from discord import app_commands
 import FreshBot as fb
 
 import openai
@@ -27,14 +28,21 @@ class ChatGPT(commands.Cog):
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         print(fb.get_time_format(12))
         print("ChatGPT Cog Error: \n", error)
+
+    def discord_requester(interaction: discord.Interaction):
+        """Returns the discord user who requested the song"""
+        name = interaction.user.name
+        discriminator = interaction.user.discriminator
+        mention = interaction.user.mention
+        return f'{mention}'
     
     # Send message to channel depending on if chatbot is enabled
-    async def send_message(self, ctx, message):
+    async def send_message(self, interaction: discord.Interaction, message):
         """ Send message to channel depending on if chatbot is enabled """
         if ENABLED:
-            await ctx.send(message)
+            await interaction.message.reply(message)
         else:
-            await ctx.send("Chatbot is disabled.")
+            await interaction.response.send_message("Chatbot is disabled.")
 
     # Get response from GPT API
     async def get_response(self, message):
@@ -54,10 +62,12 @@ class ChatGPT(commands.Cog):
 
     # Ask something (guild only)
     # @commands.guild_only()
-    @commands.command(name='ask')
-    async def ask(self, ctx, *, message):
+    @app_commands.command(name='ask')
+    async def ask(self, interaction: discord.Interaction, *, message: str):
         """ Ask the bot something """
-        await self.send_message(ctx, await self.get_response(message))
+        msg = self.discord_requester(interaction) + " asked: \n" + message
+        # await interaction.response.send_message(msg)
+        await self.send_message(interaction, await self.get_response(message))
         
     # @commands.dm_only()
     # @commands.command(name='query')

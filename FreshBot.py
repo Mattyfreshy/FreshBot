@@ -95,7 +95,7 @@ def run_discord_bot():
 
     # load extensions/cogs
     async def load():
-        for filename in os.listdir('./cmds'):
+        for filename in os.listdir('./cogs'):
             if filename.endswith('.py') and not filename in ignore:
                 await bot.load_extension(f'cmds.{filename[:-3]}')
 
