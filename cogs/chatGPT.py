@@ -2,6 +2,7 @@ import discord, os
 from discord.ext import commands
 from discord import app_commands
 import FreshBot as fb
+import asyncio
 
 import openai
 
@@ -29,7 +30,7 @@ class ChatGPT(commands.Cog):
         print(fb.get_time_format(12))
         print("ChatGPT Cog Error: \n", error)
 
-    def discord_requester(interaction: discord.Interaction):
+    def discord_requester(self, interaction: discord.Interaction):
         """Returns the discord user who requested the song"""
         name = interaction.user.name
         discriminator = interaction.user.discriminator
@@ -40,7 +41,7 @@ class ChatGPT(commands.Cog):
     async def send_message(self, interaction: discord.Interaction, message):
         """ Send message to channel depending on if chatbot is enabled """
         if ENABLED:
-            await interaction.message.reply(message)
+            await interaction.followup.send(message)
         else:
             await interaction.response.send_message("Chatbot is disabled.")
 
@@ -66,7 +67,7 @@ class ChatGPT(commands.Cog):
     async def ask(self, interaction: discord.Interaction, *, message: str):
         """ Ask the bot something """
         msg = self.discord_requester(interaction) + " asked: \n" + message
-        # await interaction.response.send_message(msg)
+        await interaction.response.send_message(msg)
         await self.send_message(interaction, await self.get_response(message))
         
     # @commands.dm_only()

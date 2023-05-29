@@ -87,6 +87,7 @@ def run_discord_bot():
 
     intents = discord.Intents.default()
     intents.message_content = True
+    intents.voice_states = True
     help_command = commands.DefaultHelpCommand(no_category='Help')
     bot = commands.Bot(command_prefix=get_prefix, help_command=help_command , intents=intents)
 
@@ -97,7 +98,7 @@ def run_discord_bot():
     async def load():
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py') and not filename in ignore:
-                await bot.load_extension(f'cmds.{filename[:-3]}')
+                await bot.load_extension(f'cogs.{filename[:-3]}')
 
     # On ready
     @bot.event

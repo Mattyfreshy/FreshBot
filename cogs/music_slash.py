@@ -32,7 +32,7 @@ ytdlopts = {
 ffmpegopts = {
     # Optimized for streaming
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn'
+    'options': '-vn -filter:a "volume=0.25"'
 }
 
 ytdl = YoutubeDL(ytdlopts)
@@ -113,11 +113,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         is_playlist = 'playlist?list=' in url
         header = f"**{'Playlist' if 'playlist?list=' in url else 'Song'} Queued - **{cls.discord_requester(interaction=interaction)}"
-        await interaction.response.defer(thinking=True)
         vol = player.volume
         embed = await cls.create_embed(url=url, info=data, header=header, vol=vol)
-        await interaction.followup.send(embed=embed)
-    
+        await interaction.response.send_message(embed=embed)
+
         # Due to dict formatting, we need get entries from playlist
         is_playlist = 'playlist?list=' in url
         if is_playlist:
@@ -162,10 +161,11 @@ class MusicPlayer():
 
     __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume')
 
-    def __init__(self, ctx: discord.Interaction):
-        self.bot = ctx.client
-        self._guild = ctx.guild
-        self._channel = ctx.channel
+    def __init__(self, interaction: discord.Interaction):
+        self.bot = interaction.client
+        self._guild = interaction.guild
+        self._channel = interaction.channel
+        self._cog = interaction.client.get_cog('Music')
         # self._cog = ctx.cog
 
         self.queue = asyncio.Queue()
@@ -175,7 +175,7 @@ class MusicPlayer():
         self.volume = 0.75
         self.current = None
 
-        ctx.client.loop.create_task(self.player_loop())
+        interaction.client.loop.create_task(self.player_loop())
 
     async def player_loop(self):
         """Our main player loop."""
@@ -186,8 +186,11 @@ class MusicPlayer():
 
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
-                async with timeout(60 * 10):  # 10 minutes...
-                    source = await self.queue.get()
+                async with timeout(60 * 3):  # 3 minutes...
+                    try: # bypass the Task exception was never retrieved error
+                        source = await self.queue.get()
+                    except:
+                        pass
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
@@ -212,7 +215,13 @@ class MusicPlayer():
                 pass
 
             # Make sure the FFmpeg process is cleaned up.
-            # source.cleanup()  # Can cause I/O operation on closed file Error
+            try:
+                """Cleanup seems to cause ffmpeg process not terminated error"""
+                source.cleanup()  # Can cause I/O operation on closed file Error
+            except Exception as e:
+                print(e)
+                pass
+                
             self.current = None
 
             # try:
@@ -223,7 +232,8 @@ class MusicPlayer():
 
     def destroy(self, guild):
         """Disconnect and cleanup the player."""
-        return self.bot.loop.create_task(Music.cleanup(guild))
+        # return self.bot.loop.create_task(guild.voice_client.disconnect())
+        return self.bot.loop.create_task(self._cog.cleanup(guild))
 
 
 class Music(commands.Cog):
@@ -245,14 +255,18 @@ class Music(commands.Cog):
         print("Music Cog Error: \n", error, "\n")
         await ctx.reply(error, ephemeral=True)
 
-    async def cleanup(self, guild):
+    async def cleanup(self, interaction: discord.Interaction):
         try:
-            await guild.voice_client.disconnect()
+            """Temp solution to mass ffmpeg process not terminated error"""
+            player = self.get_player(interaction=interaction)
+            player.queue = asyncio.Queue()
+            interaction.guild.voice_client.stop()
+            await interaction.guild.voice_client.disconnect(force=True)
         except AttributeError:
             pass
 
         try:
-            del self.players[guild.id]
+            del self.players[interaction.guild.id]
         except KeyError:
             pass
 
@@ -354,7 +368,7 @@ class Music(commands.Cog):
         if not vc:
             return await interaction.response.send_message('I am not currently connected to voice!')
 
-        await self.cleanup(interaction.guild)
+        await self.cleanup(interaction=interaction)
         await interaction.response.send_message('Disconnected!')
 
     @app_commands.command(name='play')
@@ -425,11 +439,11 @@ class Music(commands.Cog):
 
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
-
         vc.stop()
         queue = self.get_player(interaction=interaction).queue
-        if not queue.empty(): #Checks if there is a track in the queue
-            await interaction.response.send_message(f'**{YTDLSource.discord_requester(interaction=interaction)}**: Skipped the song!')
+        if not queue.empty():
+            requester = YTDLSource.discord_requester(interaction=interaction)
+            await interaction.response.send_message(f'**{requester}**: Skipped the song!')
             await queue.get()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')

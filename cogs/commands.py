@@ -24,12 +24,12 @@ class Commands(commands.Cog):
         """ Defers responses to get around 3 second response time limit """
         try:
             print(f'Deferring {command} command')
-            await interaction.response.defer(ephemeral=True)
+            await interaction.response.defer(ephemeral=True, thinking=True)
             await coroutine
             await interaction.followup.send(response)
         except Exception as e:
             print(e)
-            await interaction.response.send_message('Error deferring', ephemeral=True)
+            await interaction.response.send_message('Error deferring', ephemeral=True, delete_after=10)
 
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator = True, manage_messages=True)
@@ -67,7 +67,7 @@ class Commands(commands.Cog):
             await ctx.send(str(random.randint(int(lower), int(upper))))
         except Exception as e:
             print(e)
-            await ctx.send('Error getting random number', ephemeral=True)
+            await ctx.send('Error getting random number', ephemeral=True, delete_after=5)
     
     @commands.hybrid_command(name='quote')
     async def quote(self, ctx: commands.Context, stock: str):
@@ -76,7 +76,7 @@ class Commands(commands.Cog):
             await ctx.send(td.get_quote(stock.upper()))
         except Exception as e:
             print(e)
-            await ctx.send('Error getting quote or quote does not exist', ephemeral=True)
+            await ctx.send('Error getting quote or quote does not exist', ephemeral=True, delete_after=5)
 
 async def setup(bot):
     await bot.add_cog(Commands(bot))
