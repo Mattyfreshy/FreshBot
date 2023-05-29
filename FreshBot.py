@@ -113,7 +113,7 @@ def run_discord_bot():
             print(e)
 
         # Update playing status
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="None"))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="Your Mom!"))
         
         # Bot Running
         print(get_time_format(12))
