@@ -245,16 +245,6 @@ class Music(commands.Cog):
         self.bot = bot
         self.players = {}
 
-    @commands.Cog.listener()
-    async def on_ready(self): 
-        print('Music Cog is ready.')
-
-    # Command Error handling
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        print(fb.get_time_format(12))
-        print("Music Cog Error: \n", error, "\n")
-        await ctx.reply(error, ephemeral=True)
-
     async def cleanup(self, interaction: discord.Interaction):
         try:
             """Temp solution to mass ffmpeg process not terminated error"""

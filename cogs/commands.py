@@ -10,16 +10,6 @@ class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self): 
-        print('Commands Cog is ready.')
-
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        """ Command Error handling """
-        print(fb.get_time_format(12))
-        print("Commands Cog Error: \n", error, "\n")
-        await ctx.reply(error, ephemeral=True)
-
     async def defer_response(self, interaction: discord.Interaction, coroutine: asyncio.coroutines, command: str, response: str):
         """ Defers responses to get around 3 second response time limit """
         try:

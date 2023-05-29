@@ -21,15 +21,6 @@ class ChatGPT(commands.Cog):
         openai.api_key = os.getenv('OPENAI_API_KEY')
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self): 
-        print('ChatGPT Cog is ready.')
-    
-    # Command Error handling
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        print(fb.get_time_format(12))
-        print("ChatGPT Cog Error: \n", error)
-
     def discord_requester(self, interaction: discord.Interaction):
         """Returns the discord user who requested the song"""
         name = interaction.user.name
