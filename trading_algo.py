@@ -2,198 +2,152 @@ import datetime as dt
 import txt_dir as txt
 import math
 import asyncio
+import os
+from dotenv import load_dotenv
+from config import ALPACA_CONFIG
 
 import matplotlib.pyplot as plt
 import numpy as np
-import yfinance as yf
-import pandas as pd
-import pandas_datareader as pdr
+
+from lumibot.backtesting import YahooDataBacktesting
+from lumibot.brokers import Alpaca
+from lumibot.entities import Asset, TradingFee
+from lumibot.strategies.strategy import Strategy
+from lumibot.traders import Trader
+import talib as ta
 
 
-# Pandas settings/fixes. (pandas_datareader fix)
-yf.pdr_override()
-pd.set_option('mode.chained_assignment', None)
+# Load environment variables
+load_dotenv()
 
 # Initialize variables
+alpaca_api_key = os.getenv('ALPACA_API_KEY')
+alpaca_secret_key = os.getenv('ALPACA_SECRET_KEY')
 SMA_20 = 20
 SMA_50 = 50
 SMA_200 = 200
 
-""" Utility Functions """
 
-def marketStatus(): 
-    """ Returns True if market is open, False if market is closed """
-    weekday = dt.date.today().weekday() <= 4
-    time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
-    return weekday and time
+class FreshTrading(Strategy):
+    """ lumibot library strategy class """
 
-def read_tickers(file) -> list:
-    """ Read tickers from file and return list of tickers as strings """
-    with open(file, 'r') as f:
-        lst = []
-        for line in f:
-            if line.strip():
-                lst.append(line.strip())
-        return lst
-    
-def get_sma(stock: str, delta_days=SMA_50):
-    """ Calculate n_Day SMA (Default 50) """
-    """ 
-    Simple Moving Average:
-        SMA = ( Sum ( Price, n ) ) / n    
-        Where: n = Time Period
-    Uses 1m interval data for extreme accuracy.
-    """
-    now = dt.datetime.now() # Current date
-    df_lst = [] # List of dataframes
-    timedelta_lst = [now] # List of timedelta objects
-    n_downloads = 8 # Number of downloads from yfinance
+    def initialize(self):
+        self.sleeptime = 1
+        self.tickers = self.read_tickers(txt.TICKERS_EQUITY)
 
-    for i in range(n_downloads):
-        # Get timedelta object
-        timedelta_lst.append(timedelta_lst[-1] - dt.timedelta(days=6))
-    
-    # for time in timedelta_lst:
-    #     print(time) #* DEBUG
+    def marketStatus(self): 
+        """ Returns True if market is open, False if market is closed """
+        weekday = dt.date.today().weekday() <= 4
+        time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
+        return weekday and time
 
-    # Get df's from yfinance
-    for i in range(len(timedelta_lst)-1):
-        week_ago = timedelta_lst[i+1]
-        start_year = week_ago.year
-        start_month = week_ago.month
-        start_day = week_ago.day
-        start = dt.datetime(start_year, start_month, start_day)
-        print(start)    #* DEBUG
-        df_temp = get_stock_data(stock,start,timedelta_lst[i],'1m')
-        df_lst.append(df_temp)
-
-    
-    # n_weekdays_ago = now - dt.timedelta(days=delta_days)
-    # start_year = n_weekdays_ago.year
-    # start_month = n_weekdays_ago.month
-    # start_day = n_weekdays_ago.day
-    # start = dt.datetime(start_year, start_month, start_day)
-    # print(start)    #* DEBUG
-
-    # # Get stock close data
-    # df = get_stock_data(stock,start,now,'1m')
-    # print(df)   #* DEBUG
-    # df = df[['Close']]
-
-    # # Calculate SMA
-    # sum = df.sum()
-    # len = df.size
-    # sma = sum / len
-    # print(sma)  #* DEBUG
-
-    return
-
-def get_rsi(df, delta_days=14):
-    """ Calculate 14_Day RSI """
-    now = dt.datetime.now()
-    n_days_ago = now - dt.timedelta(days=delta_days)
-    return
-
-def get_MCAD(df):
-    """ Calculate the MACD and Signal Line indicators """
-    return
-
-# MIGHT BE TERMINATED DUE TO YFINANCE LIBRARY BEING UNRELIABLE
-def get_stock_data(stock,start_date,end_date,interval):
+    def read_tickers(file) -> list:
+        """ Read tickers from file and return list of tickers as strings """
+        with open(file, 'r') as f:
+            lst = []
+            for line in f:
+                if line.strip():
+                    lst.append(line.strip())
+            return lst
+        
+    def get_sma(self, stock: str, delta_days=SMA_50):
+        """ Calculate n_Day SMA (Default 50) """
         """ 
-        Get stock close data from yahoo finance using yfinance:
-            Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
-            Intraday data cannot extend last 60 days.
-
-        Returns pandas dataframe.
+        Simple Moving Average:
+            SMA = ( Sum ( Price, n ) ) / n    
+            Where: n = Time Period
+        Uses 1m interval data for extreme accuracy.
         """
-        df = yf.download(tickers=stock, start=start_date, end=end_date, interval=interval)
-        df.reset_index(inplace=True) 
+        now = dt.datetime.now() # Current date
 
-        # Re-parse datetime if interval is less than 1 day
-        try:
-            if interval[-1] == 'm':
-                df["Datetime"] = pd.to_datetime(df["Datetime"]).dt.strftime('%m-%d-%Y %I:%M:%S %p')
-        except:
-            print("Error parsing datetime: Might be day's stock market is closed.")
-            pass
-      
-        return df
 
-""" Main Trading Algorithm """
+        return
 
-def freshbot_trading():
-    """ 
-    Fresh trading algorithm:
-        Uses sma(50), MACD, and RSI to determine buy/sell signals.
-        Uses 1 minute interval data.
+    def get_rsi(self, df, delta_days=14):
+        """ Calculate 14_Day RSI """
+        now = dt.datetime.now()
+        n_days_ago = now - dt.timedelta(days=delta_days)
+        return
 
-    Algorithm:
-        Buy:
-        - Stock price >= SMA(50)
-        - MACD crosses above signal line and MACD < 0
-        - RSI < 65
-        
-        Sell:
-        - Stock price <= SMA(20)
-        - MACD crosses below signal line and MACD > 0
-        - RSI > 35
-    """
-    # Get stock data
-    stocks = read_tickers(txt.TICKERS_EQUITY)
+    def get_MCAD(self, df):
+        """ Calculate the MACD and Signal Line indicators """
+        return
 
-    market_open = marketStatus()
-    while market_open:
-        # Buy status variable
-        buy = False
+    def on_trading_iteration(self):
+        self.FreshStrategy()
 
-        
-        # Algorithm
-        if buy:
-            # Stock already bought
-            # Sell if conditions are met
+
+    """ Main Trading Algorithm """
+
+    def FreshStrategy(self):
+        """ 
+        Fresh trading algorithm:
+            Uses sma(50), MACD, and RSI to determine buy/sell signals.
+            Uses 1 minute interval data.
+        ----------------------------------
+        Algorithm:
+            Buy:
+            - Stock price >= SMA(50)
+            - MACD crosses above signal line and MACD < 0
+            - RSI < 65
             
-            pass
-        else:
-            # Stock not bought
-            # Buy if conditions are met
+            Sell:
+            - Stock price <= SMA(20)
+            - MACD crosses below signal line and MACD > 0
+            - RSI > 35
+        """
+        # Get stock data
+        stocks = self.read_tickers(txt.TICKERS_EQUITY)
 
-            pass
+        market_open = self.marketStatus()
+        while market_open:
+            # Buy status variable
+            buy = False
+
+            
+            # Algorithm
+            if buy:
+                # Stock already bought
+                # Sell if conditions are met
+                
+                pass
+            else:
+                # Stock not bought
+                # Buy if conditions are met
+
+                pass
 
 
-        # Delay between each iteration
-        asyncio.sleep(60)    # n second delay
-        # Get market status
-        market_open = marketStatus()
+            # Delay between each iteration
+            asyncio.sleep(60)    # n second delay
+            # Get market status
+            market_open = self.marketStatus()
 
-    return
+        return
 
 """ Main """
 
 def main():
+    trader = Trader()
+    broker = Alpaca(ALPACA_CONFIG)
+    strategy = FreshTrading(name='FreshStrategy', broker=broker)
+
+
     """ Testing Stage """
+    backtesting_start = dt.datetime(2020, 1, 1)
+    backtesting_end = dt.datetime(2020, 12, 31)
+    strategy.backtest(
+        YahooDataBacktesting,
+        backtesting_start,
+        backtesting_end,
+        parameters= {
+            "symbol": "SPY"
+        },
+    )
 
-    # ticker = read_tickers(txt.TICKERS_EQUITY)
-    # # ticker = 'AAPL'
-    # # Last 3 years closing prices starting from Jan 2, 2018.
-    
-    # now = dt.datetime.now()
-    # delta_days = 3
-    # n_days_ago = now - dt.timedelta(days=delta_days)
+    trader.add_strategy(strategy)
+    trader.run_all()
 
-    # start_year = n_days_ago.year
-    # start_month = n_days_ago.month
-    # start_day = n_days_ago.day
-    # start = dt.datetime(start_year, start_month, start_day)
-
-    # # pandas_datareader
-    # df = pdr.get_data_yahoo(ticker, start, now)
-
-    # # yfinance
-    # df = get_stock_data('AAPl',start,now,'1m')
-    # print(df)
-
-    get_sma('AAPL', delta_days=6)
     return    
 
 if __name__ == '__main__':
