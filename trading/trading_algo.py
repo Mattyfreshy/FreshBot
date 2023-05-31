@@ -30,7 +30,7 @@ class FreshTrading(Strategy):
     """ lumibot library strategy class """
 
     def initialize(self):
-        self.sleeptime = 1
+        self.sleeptime = 1  # minutes
         self.tickers = self.read_tickers(txt.TICKERS_EQUITY)
 
     def marketStatus(self): 
@@ -137,11 +137,13 @@ class FreshTrading(Strategy):
             - MACD crosses below signal line and MACD > 0
             - RSI > 35
         """
+        # Backtesting
+        backtesting = False
+
         # Get stock data
         stocks = self.read_tickers(txt.TICKERS_EQUITY)
 
-        market_open = self.marketStatus()
-        while market_open:
+        if self.marketStatus() or backtesting:
             # Buy status variable
             buy = False
 
@@ -149,11 +151,18 @@ class FreshTrading(Strategy):
             df = tdy.get_stock_data(stocks[0], '1m')
 
             # Technical indicators
-            sma_20 = self.get_sma('AAPL', 20)
-            sma_50 = self.get_sma('AAPL', 50)
-            mcad = self.get_MCAD('AAPL')
-            rsi = self.get_rsi('AAPL')
-
+            sma_20 = self.get_sma(df, 20)
+            sma_50 = self.get_sma(df, 50)
+            rsi = self.get_rsi(df)
+            mcad_tuple = self.get_MCAD(df)
+            mcad = mcad_tuple[0]
+            signal = mcad_tuple[1]
+            
+            print('SMA_20: ', sma_20)
+            print('SMA_50: ', sma_50)
+            print('RSI: ', rsi)
+            print('MACD: ', mcad)
+            print('Signal: ', signal)
             
             # Algorithm
             if buy:
@@ -166,12 +175,6 @@ class FreshTrading(Strategy):
                 # Buy if conditions are met
 
                 pass
-
-
-            # Delay between each iteration
-            asyncio.sleep(60)    # n second delay
-            # Get market status
-            market_open = self.marketStatus()
 
         return
 

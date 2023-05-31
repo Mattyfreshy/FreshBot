@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 import datetime as dt
 import txt_dir as txt
+import asyncio
 
 import talib as ta
 
@@ -18,6 +19,12 @@ pd.set_option('mode.chained_assignment', None)
 
 
 """ Technical Indicator Functions """
+
+def marketStatus(self): 
+    """ Returns True if market is open, False if market is closed """
+    weekday = dt.date.today().weekday() <= 4
+    time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
+    return weekday and time
 
 def read_tickers(file) -> list:
     """ 
@@ -122,11 +129,28 @@ def main():
     """ Testing Stage """
     ticker = read_tickers(txt.TICKERS_EQUITY)
 
-    df = get_stock_data(ticker[0],'1m')
+    market_open = marketStatus()
+    while market_open:
+        df = get_stock_data(ticker[0],'1m')
 
-    # print(get_sma(df,20))
-    # print(get_MCAD(df))
-    print(get_rsi(df))
+        # Technical indicators
+        sma_20 = get_sma(df, 20)
+        sma_50 = get_sma(df, 50)
+        rsi = get_rsi(df)
+        mcad_tuple = get_MCAD(df)
+        mcad = mcad_tuple[0]
+        signal = mcad_tuple[1]
+
+        print('SMA_20: ', sma_20)
+        print('SMA_50: ', sma_50)
+        print('RSI: ', rsi)
+        print('MACD: ', mcad)
+        print('Signal: ', signal)
+
+        # Delay between each iteration
+        asyncio.sleep(60)    # n second delay
+        # Get market status
+        market_open = marketStatus()
 
     return    
 
