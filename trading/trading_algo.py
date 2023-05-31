@@ -3,6 +3,7 @@ import txt_dir as txt
 import math
 import asyncio
 import os
+
 from dotenv import load_dotenv
 from config import ALPACA_CONFIG
 
@@ -53,7 +54,7 @@ class FreshTrading(Strategy):
                     lst.append(line.strip())
             return lst
         
-    def get_sma(self, stock: str, length=SMA_50):
+    def get_sma(self, stock: str, n=SMA_50):
         """ Calculate n_Day SMA (Default 50) """
         """ 
         Simple Moving Average:
@@ -62,20 +63,20 @@ class FreshTrading(Strategy):
         - Use 1m interval data for day trading.
         - Use 10m interval data for weekly trading.
         """
-        now = dt.datetime.now() # Current date
-        asset = 'AAPL'
-        historical_prices = self.get_historical_prices(
-            asset=asset,
-            length=100,
-            timestep="day",
-        )
+        # now = dt.datetime.now() # Current date
+        # asset = 'AAPL'
+        # historical_prices = self.get_historical_prices(
+        #     asset=asset,
+        #     length=100,
+        #     timestep="day",
+        # )
 
-        df = historical_prices.df
-        df_20 = df['close'][-20:]
-        # print(df['close'][-20:].reset_index())
-        sma_20 = ta.SMA(df_20, timeperiod=20)
-        # print(df.reset_index())
-        # print(sma_20)
+        # df = historical_prices.df
+        # df_20 = df['close'][-n:]
+        # # print(df['close'][-20:].reset_index())
+        # sma_20 = ta.SMA(df_20, timeperiod=20)
+        # # print(df.reset_index())
+        # print(sma_20[0])
 
         return
 

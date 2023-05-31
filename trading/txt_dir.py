@@ -1,14 +1,10 @@
-import asyncio
-import yfinance as yf
-import pandas_datareader.data as web
-import pandas as pd
-import datetime as dt
-import trading as td
+import os
 
 """ Module for file paths of text files """
 
 # Text file Directories/Filepaths
-DIR = 'txt/'
+cwd = os.getcwd()
+DIR = 'trading/txt/'
 TICKERS_EQUITY = DIR + 'tickersEquity.txt'
 TICKERS_ETF = DIR + 'tickersETF.txt'
 TRADES = DIR + 'trades.txt'
