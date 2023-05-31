@@ -9,6 +9,9 @@ from config import ALPACA_CONFIG
 import matplotlib.pyplot as plt
 import numpy as np
 
+import plotly.graph_objects as go
+import plotly.express as px
+
 from lumibot.backtesting import YahooDataBacktesting
 from lumibot.brokers import Alpaca
 from lumibot.entities import Asset, TradingFee
@@ -50,16 +53,29 @@ class FreshTrading(Strategy):
                     lst.append(line.strip())
             return lst
         
-    def get_sma(self, stock: str, delta_days=SMA_50):
+    def get_sma(self, stock: str, length=SMA_50):
         """ Calculate n_Day SMA (Default 50) """
         """ 
         Simple Moving Average:
             SMA = ( Sum ( Price, n ) ) / n    
-            Where: n = Time Period
-        Uses 1m interval data for extreme accuracy.
+            Where: n = Time Period in that respective unit (days, minutes, etc.)
+        - Use 1m interval data for day trading.
+        - Use 10m interval data for weekly trading.
         """
         now = dt.datetime.now() # Current date
+        asset = 'AAPL'
+        historical_prices = self.get_historical_prices(
+            asset=asset,
+            length=100,
+            timestep="day",
+        )
 
+        df = historical_prices.df
+        df_20 = df['close'][-20:]
+        # print(df['close'][-20:].reset_index())
+        sma_20 = ta.SMA(df_20, timeperiod=20)
+        # print(df.reset_index())
+        # print(sma_20)
 
         return
 
@@ -75,7 +91,6 @@ class FreshTrading(Strategy):
 
     def on_trading_iteration(self):
         self.FreshStrategy()
-
 
     """ Main Trading Algorithm """
 
@@ -132,21 +147,22 @@ def main():
     broker = Alpaca(ALPACA_CONFIG)
     strategy = FreshTrading(name='FreshStrategy', broker=broker)
 
+    print(strategy.get_sma('AAPL'))
 
     """ Testing Stage """
-    backtesting_start = dt.datetime(2020, 1, 1)
-    backtesting_end = dt.datetime(2020, 12, 31)
-    strategy.backtest(
-        YahooDataBacktesting,
-        backtesting_start,
-        backtesting_end,
-        parameters= {
-            "symbol": "SPY"
-        },
-    )
+    # backtesting_start = dt.datetime(2020, 1, 1)
+    # backtesting_end = dt.datetime(2020, 12, 31)
+    # strategy.backtest(
+    #     YahooDataBacktesting,
+    #     backtesting_start,
+    #     backtesting_end,
+    #     parameters= {
+    #         "symbol": "SPY"
+    #     },
+    # )
 
-    trader.add_strategy(strategy)
-    trader.run_all()
+    # trader.add_strategy(strategy)
+    # trader.run_all()
 
     return    
 
