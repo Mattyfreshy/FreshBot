@@ -3,6 +3,7 @@ import txt_dir as txt
 import math
 import asyncio
 import os
+import trading.trading_yahoo as tdy
 
 from dotenv import load_dotenv
 from config import ALPACA_CONFIG
