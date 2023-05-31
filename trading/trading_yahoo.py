@@ -46,7 +46,6 @@ def get_sma(stock: str, n=50):
     # Get stock close data
     df = get_stock_data(stock,start,now,'1m')
     df_sum = sum(df['Close'][-n:])
-    print(round(df_sum/n,2))
 
     return round(df_sum/n,2)
 
@@ -87,7 +86,7 @@ def main():
     """ Testing Stage """
     ticker = read_tickers(txt.TICKERS_EQUITY)
 
-    get_sma('AAPL',20)
+    print(get_sma('AAPL',20))
 
 
     return    
