@@ -2,7 +2,7 @@ import datetime as dt
 import txt_dir as txt
 import asyncio
 import os
-import trading.trading_yahoo as tdy
+import trading_yahoo as tdy
 
 from dotenv import load_dotenv
 from config import ALPACA_CONFIG
@@ -60,19 +60,18 @@ class FreshTrading(Strategy):
         Returns: SMA
         """
         # now = dt.datetime.now() # Current date
-        # asset = 'AAPL'
-        # historical_prices = self.get_historical_prices(
-        #     asset=asset,
-        #     length=100,
-        #     timestep="day",
-        # )
+        asset = 'AAPL'
+        historical_prices = self.get_historical_prices(
+            asset=asset,
+            length=100,
+            timestep="day",
+        )
 
-        # df = historical_prices.df
-        # df_20 = df['close'][-n:]
-        # # print(df['close'][-20:].reset_index())
-        # sma_20 = ta.SMA(df_20, timeperiod=20)
-        # # print(df.reset_index())
-        # print(sma_20[0])
+        df = historical_prices.df
+        df_20 = df['close'][-timeperiod:]
+        # print(df['close'][-20:].reset_index())
+        # sma_20 = ta.SMA(df_20, timeperiod=timeperiod)
+        # print(df.reset_index())
 
         return tdy.get_sma(df, timeperiod=timeperiod)
 
@@ -96,7 +95,7 @@ class FreshTrading(Strategy):
         """
         return tdy.get_rsi(df, timeperiod=timeperiod)
 
-    def get_MCAD(self, df, *, fastperiod=12, slowperiod=26, signalperiod=9):
+    def get_macd(self, df, *, fastperiod=12, slowperiod=26, signalperiod=9):
         """ 
         Calculate the MACD and Signal Line indicators 
             MCAD:
@@ -113,7 +112,7 @@ class FreshTrading(Strategy):
 
         Returns: tuple(MACD, Signal Line, Histogram)
         """
-        return tdy.get_MCAD(df, fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+        return tdy.get_macd(df, fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
 
     def on_trading_iteration(self):
         self.FreshStrategy()
@@ -124,57 +123,60 @@ class FreshTrading(Strategy):
         """ 
         Fresh trading algorithm:
             Uses sma(50), MACD, and RSI to determine buy/sell signals.
-            Uses 1 minute interval data.
+            - Uses 1 minute interval data for daily.
+            - Uses 5 minute interval data for weekly.
         ----------------------------------
         Algorithm:
             Buy:
             - Stock price >= SMA(50)
-            - MACD crosses above signal line and MACD < 0
+            - MACD crosses above signal line
             - RSI < 65
             
             Sell:
             - Stock price <= SMA(20)
-            - MACD crosses below signal line and MACD > 0
+            - MACD crosses below signal line
             - RSI > 35
         """
         # Backtesting
-        backtesting = False
+        backtesting = True
+        debug = True
 
         # Get stock data
         stocks = self.read_tickers(txt.TICKERS_EQUITY)
 
         if self.marketStatus() or backtesting:
             # Buy status variable
-            buy = False
+            has_position = False
 
             # Get stock data
             df = tdy.get_stock_data(stocks[0], '1m')
 
             # Technical indicators
-            sma_20 = self.get_sma(df, 20)
-            sma_50 = self.get_sma(df, 50)
-            rsi = self.get_rsi(df)
-            mcad_tuple = self.get_MCAD(df)
-            mcad = mcad_tuple[0]
-            signal = mcad_tuple[1]
-            
-            print('SMA_20: ', sma_20)
-            print('SMA_50: ', sma_50)
-            print('RSI: ', rsi)
-            print('MACD: ', mcad)
-            print('Signal: ', signal)
-            
-            # Algorithm
-            if buy:
-                # Stock already bought
-                # Sell if conditions are met
-                
-                pass
-            else:
-                # Stock not bought
-                # Buy if conditions are met
+            current_price = df['Close'][-1:].tolist()[0]
+            sma_20 = self.get_sma(df, timeperiod=20).tolist()[0]
+            sma_50 = self.get_sma(df, timeperiod=50).tolist()[0]
+            rsi = self.get_rsi(df).tolist()[0]
+            macd_tuple = self.get_macd(df)
+            macd = macd_tuple[0].tolist()[0]
+            signal = macd_tuple[1].tolist()[0]
 
-                pass
+            if debug:
+                print(dt.datetime.now())
+                print('Current Price: ', current_price)
+                print('SMA_20: ', sma_20)
+                print('SMA_50: ', sma_50)
+                print('RSI: ', rsi)
+                print('MACD: ', macd)
+                print('Signal: ', signal)
+
+            if has_position:
+                if current_price <= sma_20 and macd < signal and macd > 0 and rsi > 35:
+                    print('Sell: ', current_price)
+                    has_position = False
+            else:
+                if current_price >= sma_50 and macd > signal and macd < 0 and rsi < 65:
+                    print('Buy: ', current_price)
+                    has_position = True
 
         return
 
@@ -185,7 +187,7 @@ def main():
     broker = Alpaca(ALPACA_CONFIG)
     strategy = FreshTrading(name='FreshStrategy', broker=broker)
 
-    print(strategy.get_sma('AAPL'))
+    print(strategy.get_sma('AAPL', timeperiod=20))
 
     """ Testing Stage """
     # backtesting_start = dt.datetime(2020, 1, 1)
@@ -199,6 +201,7 @@ def main():
     #     },
     # )
 
+    """ Run Strategy Live """
     # trader.add_strategy(strategy)
     # trader.run_all()
 

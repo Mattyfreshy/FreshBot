@@ -3,6 +3,7 @@ import pandas as pd
 import datetime as dt
 import txt_dir as txt
 import asyncio
+import time
 
 import talib as ta
 
@@ -17,14 +18,28 @@ Technical Indicators from yfinance:
 yf.pdr_override()
 pd.set_option('mode.chained_assignment', None)
 
+""" Utility Functions """
 
-""" Technical Indicator Functions """
-
-def marketStatus(self): 
+def get_time_now_format(format):
+    """ 
+    Return time format depending on user preference
+    - 12 hour (default) 
+    - 24 hour 
+    """
+    if format == '12':
+        return dt.datetime.now().strftime("%m-%d-%Y %I:%M:%S %p")
+    elif format == '24':
+        return dt.datetime.now().strftime("%H:%M:%S")
+    else:
+        return dt.datetime.now().strftime("%m-%d-%Y %I:%M:%S %p")
+    
+def marketStatus(): 
     """ Returns True if market is open, False if market is closed """
     weekday = dt.date.today().weekday() <= 4
     time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
     return weekday and time
+
+""" Technical Indicator Functions """
 
 def read_tickers(file) -> list:
     """ 
@@ -74,10 +89,10 @@ def get_rsi(df, *, timeperiod=14):
     """
     return ta.RSI(df['Close'], timeperiod=timeperiod)[-1:]
 
-def get_MCAD(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
+def get_macd(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
     """ 
     Calculate the MACD and Signal Line indicators 
-        MCAD:
+        MACD:
             MACD = 12_Day EMA - 26_Day EMA
             Signal Line = 9_Day EMA of MACD
             Histogram = MACD - Signal Line
@@ -91,8 +106,8 @@ def get_MCAD(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
 
     Returns: tuple(MACD, Signal Line, Histogram)
     """
-    mcad, signal, hist = ta.MACD(df['Close'], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
-    return  (mcad[-1:], signal[-1:], hist[-1:])
+    macd, signal, hist = ta.MACD(df['Close'], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+    return  (macd[-1:], signal[-1:], hist[-1:])
 
 def get_stock_data(stock,interval):
         """ 
@@ -104,7 +119,7 @@ def get_stock_data(stock,interval):
         """
         # Get timeframe
         now = dt.datetime.now()
-        n_days_ago = now - dt.timedelta(days=2)
+        n_days_ago = now - dt.timedelta(days=5)
         start_year = n_days_ago.year
         start_month = n_days_ago.month
         start_day = n_days_ago.day
@@ -127,6 +142,9 @@ def get_stock_data(stock,interval):
 
 def main():
     """ Testing Stage """
+    debug = True
+    has_position = False
+
     ticker = read_tickers(txt.TICKERS_EQUITY)
 
     market_open = marketStatus()
@@ -134,23 +152,43 @@ def main():
         df = get_stock_data(ticker[0],'1m')
 
         # Technical indicators
-        sma_20 = get_sma(df, 20)
-        sma_50 = get_sma(df, 50)
-        rsi = get_rsi(df)
-        mcad_tuple = get_MCAD(df)
-        mcad = mcad_tuple[0]
-        signal = mcad_tuple[1]
+        current_price = df['Close'][-1:].tolist()[0]
+        sma_20 = get_sma(df, timeperiod=20).tolist()[0]
+        sma_50 = get_sma(df, timeperiod=50).tolist()[0]
+        rsi = get_rsi(df).tolist()[0]
+        macd_tuple = get_macd(df)
+        macd = macd_tuple[0].tolist()[0]
+        signal = macd_tuple[1].tolist()[0]
 
-        print('SMA_20: ', sma_20)
-        print('SMA_50: ', sma_50)
-        print('RSI: ', rsi)
-        print('MACD: ', mcad)
-        print('Signal: ', signal)
+        if debug:
+            print(get_time_now_format('12'))
+            print('Position: ', has_position)
+            print('Current Price: ', current_price)
+            print('SMA_20: ', sma_20)
+            print('SMA_50: ', sma_50)
+            print('RSI: ', rsi)
+            print('MACD: ', macd)
+            print('Signal: ', signal)
+
+        if has_position:
+            if current_price <= sma_20 and macd < signal and rsi > 30:
+                with open(txt.TRADES, 'a') as f:
+                    f.write(f'{get_time_now_format("12")}: Sell {ticker[0]} @ {round(current_price,2)}\n')
+                print('Sell: ', current_price)
+                has_position = False
+        else:
+            if current_price >= sma_50 and macd > signal and rsi < 70:
+                with open(txt.TRADES, 'a') as f:
+                    f.write(f'{get_time_now_format("12")}: Buy {ticker[0]} @ {round(current_price,2)}\n')
+                print('Buy: ', current_price)
+                has_position = True
 
         # Delay between each iteration
-        asyncio.sleep(60)    # n second delay
+        time.sleep(60)    # n second delay
         # Get market status
         market_open = marketStatus()
+
+    print('Stock Market Closed')
 
     return    
 

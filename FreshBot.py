@@ -25,11 +25,11 @@ def get_time_format(format):
     - 24 hour 
     """
     if format == '12':
-        return dt.datetime.now().strftime("%I:%M %p")
+        return dt.datetime.now().strftime("%m-%d-%Y %I:%M %p")
     elif format == '24':
         return dt.datetime.now().strftime("%H:%M")
     else:
-        return dt.datetime.now().strftime("%I:%M %p")
+        return dt.datetime.now().strftime("%m-%d-%Y %I:%M %p")
 
 async def get_quote(channels, enabled):
     """ Send stock quote every minute """
