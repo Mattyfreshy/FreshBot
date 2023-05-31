@@ -1,18 +1,11 @@
 import datetime as dt
 import txt_dir as txt
-import math
 import asyncio
 import os
 import trading.trading_yahoo as tdy
 
 from dotenv import load_dotenv
 from config import ALPACA_CONFIG
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-import plotly.graph_objects as go
-import plotly.express as px
 
 from lumibot.backtesting import YahooDataBacktesting
 from lumibot.brokers import Alpaca
@@ -55,14 +48,16 @@ class FreshTrading(Strategy):
                     lst.append(line.strip())
             return lst
         
-    def get_sma(self, stock: str, n=SMA_50):
-        """ Calculate n_Day SMA (Default 50) """
+    def get_sma(self, df, *, timeperiod=50):
         """ 
-        Simple Moving Average:
-            SMA = ( Sum ( Price, n ) ) / n    
-            Where: n = Time Period in that respective unit (days, minutes, etc.)
-        - Use 1m interval data for day trading.
-        - Use 10m interval data for weekly trading.
+        Calculate n_Day SMA (Default 50)
+            Simple Moving Average:
+                SMA = ( Sum ( Price, n ) ) / n    
+                Where: n = Time Period in that respective unit (days, minutes, etc.)
+            - Use 1m interval data for day trading.
+            - Use 10m interval data for weekly trading.
+        
+        Returns: SMA
         """
         # now = dt.datetime.now() # Current date
         # asset = 'AAPL'
@@ -79,17 +74,46 @@ class FreshTrading(Strategy):
         # # print(df.reset_index())
         # print(sma_20[0])
 
-        return tdy.get_sma(stock, n)
+        return tdy.get_sma(df, timeperiod=timeperiod)
 
-    def get_rsi(self, df, delta_days=14):
-        """ Calculate 14_Day RSI """
-        now = dt.datetime.now()
-        n_days_ago = now - dt.timedelta(days=delta_days)
-        return
+    def get_rsi(self, df, *, timeperiod=14):
+        """ 
+        Calculate 14_Day RSI 
+            RSI Step 1:
+                RSI = 100 - (100 / (1 + RS))
+                Where:
+                    RS = Average Gain / Average Loss
+                    Average Gain = Sum of Gains over the past 14 periods / 14
+                    Average Loss = Sum of Losses over the past 14 periods / 14
+            RSI Step 2:
+                Calculate Relative Strength (RS)
+                RS = Average Gain / Average Loss
+                Where:
+                    Average Gain = [(previous Average Gain) x 13 + current Gain] / 14
+                    Average Loss = [(previous Average Loss) x 13 + current Loss] / 14
+        
+        Returns: RSI
+        """
+        return tdy.get_rsi(df, timeperiod=timeperiod)
 
-    def get_MCAD(self, df):
-        """ Calculate the MACD and Signal Line indicators """
-        return
+    def get_MCAD(self, df, *, fastperiod=12, slowperiod=26, signalperiod=9):
+        """ 
+        Calculate the MACD and Signal Line indicators 
+            MCAD:
+                MACD = 12_Day EMA - 26_Day EMA
+                Signal Line = 9_Day EMA of MACD
+                Histogram = MACD - Signal Line
+            EMA:
+                EMA = (Price(t) x K) + (EMA(y) x (1-K))
+                Where:
+                    t = today
+                    y = yesterday
+                    N = number of days in EMA
+                    K = 2 / (N+1)
+
+        Returns: tuple(MACD, Signal Line, Histogram)
+        """
+        return tdy.get_MCAD(df, fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
 
     def on_trading_iteration(self):
         self.FreshStrategy()
@@ -120,6 +144,15 @@ class FreshTrading(Strategy):
         while market_open:
             # Buy status variable
             buy = False
+
+            # Get stock data
+            df = tdy.get_stock_data(stocks[0], '1m')
+
+            # Technical indicators
+            sma_20 = self.get_sma('AAPL', 20)
+            sma_50 = self.get_sma('AAPL', 50)
+            mcad = self.get_MCAD('AAPL')
+            rsi = self.get_rsi('AAPL')
 
             
             # Algorithm

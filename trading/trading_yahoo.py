@@ -3,6 +3,8 @@ import pandas as pd
 import datetime as dt
 import txt_dir as txt
 
+import talib as ta
+
 """
 Technical Indicators from yfinance:
     - Simple Moving Average (SMA)
@@ -18,7 +20,10 @@ pd.set_option('mode.chained_assignment', None)
 """ Technical Indicator Functions """
 
 def read_tickers(file) -> list:
-    """ Read tickers from file and return list of tickers as strings """
+    """ 
+    Read tickers from file and return list of tickers as strings 
+    Returns: list of tickers as strings
+    """
     with open(file, 'r') as f:
         lst = []
         for line in f:
@@ -26,40 +31,63 @@ def read_tickers(file) -> list:
                 lst.append(line.strip())
         return lst
     
-def get_sma(stock: str, n=50):
-    """ Calculate n_Day SMA (Default 50) """
+def get_sma(df, *, timeperiod=50):
     """ 
-    Simple Moving Average:
-        SMA = ( Sum ( Price, n ) ) / n    
-        Where: n = Time Period in that respective unit (days, minutes, etc.)
-    - Use 1m interval data for day trading.
-    - Use 10m interval data for weekly trading.
+    Calculate n_Day SMA (Default 50)
+        Simple Moving Average:
+            SMA = ( Sum ( Price, n ) ) / n    
+            Where: n = Time Period in that respective unit (days, minutes, etc.)
+        - Use 1m interval data for day trading.
+        - Use 10m interval data for weekly trading.
+    
+    Returns: SMA
     """
-    # Get timeframe
-    now = dt.datetime.now()
-    n_days_ago = now - dt.timedelta(days=2)
-    start_year = n_days_ago.year
-    start_month = n_days_ago.month
-    start_day = n_days_ago.day
-    start = dt.datetime(start_year, start_month, start_day)
-
     # Get stock close data
-    df = get_stock_data(stock,start,now,'1m')
-    df_sum = sum(df['Close'][-n:])
+    df_sum = sum(df['Close'][-timeperiod:])
+    # return df_sum/n
+    return ta.SMA(df['Close'], timeperiod=timeperiod)[-1:]
 
-    return round(df_sum/n,2)
+def get_rsi(df, *, timeperiod=14):
+    """ 
+    Calculate 14_Day RSI 
+        RSI Step 1:
+            RSI = 100 - (100 / (1 + RS))
+            Where:
+                RS = Average Gain / Average Loss
+                Average Gain = Sum of Gains over the past 14 periods / 14
+                Average Loss = Sum of Losses over the past 14 periods / 14
+        RSI Step 2:
+            Calculate Relative Strength (RS)
+            RS = Average Gain / Average Loss
+            Where:
+                Average Gain = [(previous Average Gain) x 13 + current Gain] / 14
+                Average Loss = [(previous Average Loss) x 13 + current Loss] / 14
+    
+    Returns: RSI
+    """
+    return ta.RSI(df['Close'], timeperiod=timeperiod)[-1:]
 
-def get_rsi(df, delta_days=14):
-    """ Calculate 14_Day RSI """
-    now = dt.datetime.now()
-    n_days_ago = now - dt.timedelta(days=delta_days)
-    return
+def get_MCAD(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
+    """ 
+    Calculate the MACD and Signal Line indicators 
+        MCAD:
+            MACD = 12_Day EMA - 26_Day EMA
+            Signal Line = 9_Day EMA of MACD
+            Histogram = MACD - Signal Line
+        EMA:
+            EMA = (Price(t) x K) + (EMA(y) x (1-K))
+            Where:
+                t = today
+                y = yesterday
+                N = number of days in EMA
+                K = 2 / (N+1)
 
-def get_MCAD(df):
-    """ Calculate the MACD and Signal Line indicators """
-    return
+    Returns: tuple(MACD, Signal Line, Histogram)
+    """
+    mcad, signal, hist = ta.MACD(df['Close'], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+    return  (mcad[-1:], signal[-1:], hist[-1:])
 
-def get_stock_data(stock,start_date,end_date,interval):
+def get_stock_data(stock,interval):
         """ 
         Get stock close data from yahoo finance using yfinance.
         - Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
@@ -67,7 +95,15 @@ def get_stock_data(stock,start_date,end_date,interval):
 
         Returns pandas dataframe.
         """
-        df = yf.download(tickers=stock, start=start_date, end=end_date, interval=interval)
+        # Get timeframe
+        now = dt.datetime.now()
+        n_days_ago = now - dt.timedelta(days=2)
+        start_year = n_days_ago.year
+        start_month = n_days_ago.month
+        start_day = n_days_ago.day
+        start = dt.datetime(start_year, start_month, start_day)
+
+        df = yf.download(tickers=stock, start=start, end=now, interval=interval)
         df.reset_index(inplace=True) 
 
         # Re-parse datetime if interval is less than 1 day
@@ -86,8 +122,11 @@ def main():
     """ Testing Stage """
     ticker = read_tickers(txt.TICKERS_EQUITY)
 
-    print(get_sma('AAPL',20))
+    df = get_stock_data(ticker[0],'1m')
 
+    # print(get_sma(df,20))
+    # print(get_MCAD(df))
+    print(get_rsi(df))
 
     return    
 
