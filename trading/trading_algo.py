@@ -79,7 +79,7 @@ class FreshTrading(Strategy):
         # # print(df.reset_index())
         # print(sma_20[0])
 
-        return
+        return tdy.get_sma(stock, n)
 
     def get_rsi(self, df, delta_days=14):
         """ Calculate 14_Day RSI """
