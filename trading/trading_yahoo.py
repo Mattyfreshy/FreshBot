@@ -186,7 +186,7 @@ def main():
                 has_position = True
 
         # Delay between each iteration
-        time.sleep(5)    # n second delay
+        time.sleep(10)    # n second delay
         # Get market status
         market_open = marketStatus()
 
