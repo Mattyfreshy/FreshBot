@@ -59,21 +59,7 @@ class FreshTrading(Strategy):
         
         Returns: SMA
         """
-        # now = dt.datetime.now() # Current date
-        asset = 'AAPL'
-        historical_prices = self.get_historical_prices(
-            asset=asset,
-            length=100,
-            timestep="day",
-        )
-
-        df = historical_prices.df
-        df_20 = df['close'][-timeperiod:]
-        # print(df['close'][-20:].reset_index())
-        # sma_20 = ta.SMA(df_20, timeperiod=timeperiod)
-        # print(df.reset_index())
-
-        return tdy.get_sma(df, timeperiod=timeperiod)
+        return ta.SMA(df['close'], timeperiod=timeperiod).tolist()[-1]
 
     def get_rsi(self, df, *, timeperiod=14):
         """ 
@@ -93,11 +79,11 @@ class FreshTrading(Strategy):
         
         Returns: RSI
         """
-        return tdy.get_rsi(df, timeperiod=timeperiod)
+        return ta.RSI(df['close'], timeperiod=timeperiod).tolist()[-1]
 
     def get_macd(self, df, *, fastperiod=12, slowperiod=26, signalperiod=9):
         """ 
-        Calculate the MACD and Signal Line indicators 
+        Calculate the MACD and Signal Line indicators.
             MCAD:
                 MACD = 12_Day EMA - 26_Day EMA
                 Signal Line = 9_Day EMA of MACD
@@ -112,7 +98,29 @@ class FreshTrading(Strategy):
 
         Returns: tuple(MACD, Signal Line, Histogram)
         """
-        return tdy.get_macd(df, fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+        macd, signal, hist = ta.MACD(df['close'], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+        return  (macd.tolist()[-1], signal.tolist()[-1], hist.tolist()[-1])
+    
+    def get_stock_data(self, asset, length, timestep):
+        """ 
+        Get historical prices for a given asset.
+            asset: str
+                Ticker symbol of asset
+            length: int
+                Number of days to get historical prices for
+            timestep: str
+                Time interval of historical prices
+                - 'minute'
+                - 'day'
+        """
+        historical_prices = self.get_historical_prices(
+            asset=asset,
+            length=length,
+            timestep=timestep,
+        )
+
+        df = historical_prices.df
+        return df
 
     def on_trading_iteration(self):
         self.FreshStrategy()
@@ -149,10 +157,10 @@ class FreshTrading(Strategy):
             has_position = False
 
             # Get stock data
-            df = tdy.get_stock_data(stocks[0], '1m')
+            df = self.get_stock_data(asset='AAPL', length=100, timestep='day')
 
             # Technical indicators
-            current_price = df['Close'][-1:].tolist()[0]
+            current_price = df['close'].tolist()[-1]
             sma_20 = self.get_sma(df, timeperiod=20).tolist()[0]
             sma_50 = self.get_sma(df, timeperiod=50).tolist()[0]
             rsi = self.get_rsi(df).tolist()[0]

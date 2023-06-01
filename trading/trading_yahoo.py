@@ -85,7 +85,7 @@ def get_sma(df, *, timeperiod=50):
     # Get stock close data
     # df_sum = sum(df['Close'][-timeperiod:])
     # return df_sum/n
-    return ta.SMA(df['Close'], timeperiod=timeperiod)[-1:]
+    return ta.SMA(df['Close'], timeperiod=timeperiod).tolist()[-1]
 
 def get_rsi(df, *, timeperiod=14):
     """ 
@@ -105,7 +105,7 @@ def get_rsi(df, *, timeperiod=14):
     
     Returns: RSI
     """
-    return ta.RSI(df['Close'], timeperiod=timeperiod)[-1:]
+    return ta.RSI(df['Close'], timeperiod=timeperiod).tolist()[-1]
 
 def get_macd(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
     """ 
@@ -125,7 +125,7 @@ def get_macd(df, *, fastperiod=12, slowperiod=26, signalperiod=9):
     Returns: tuple(MACD, Signal Line, Histogram)
     """
     macd, signal, hist = ta.MACD(df['Close'], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
-    return  (macd[-1:], signal[-1:], hist[-1:])
+    return  (macd.tolist()[-1], signal.tolist()[-1], hist.tolist()[-1])
 
 def get_stock_data(stock,interval):
         """ 
@@ -170,13 +170,13 @@ def day_trading():
         df = get_stock_data(ticker[0],'5m')
 
         # Technical indicators
-        current_price = df['Close'][-1:].tolist()[0]
-        sma_20 = get_sma(df, timeperiod=20).tolist()[0]
-        sma_50 = get_sma(df, timeperiod=50).tolist()[0]
-        rsi = get_rsi(df).tolist()[0]
+        current_price = df['Close'].tolist()[-1]
+        sma_20 = get_sma(df, timeperiod=20)
+        sma_50 = get_sma(df, timeperiod=50)
+        rsi = get_rsi(df)
         macd_tuple = get_macd(df)
-        macd = macd_tuple[0].tolist()[0]
-        signal = macd_tuple[1].tolist()[0]
+        macd = macd_tuple[0]
+        signal = macd_tuple[1]
 
         if debug:
             print(get_time_now_format('12'))
@@ -271,7 +271,9 @@ def main():
     else:
         weekly_trading()
     
-    print(calculate_profit(txt.TRADES))
+    # print(calculate_profit(txt.TRADES))
+
+    df = get_stock_data('AAPL','1m')
 
     return    
 
