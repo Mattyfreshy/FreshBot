@@ -139,7 +139,7 @@ class FreshTrading(Strategy):
         """
         # Backtesting
         backtesting = True
-        debug = True
+        debug = False
 
         # Get stock data
         stocks = self.read_tickers(txt.TICKERS_EQUITY)
@@ -170,11 +170,11 @@ class FreshTrading(Strategy):
                 print('Signal: ', signal)
 
             if has_position:
-                if current_price <= sma_20 and macd < signal and macd > 0 and rsi > 35:
+                if current_price <= sma_20 and macd < signal and rsi > 30:
                     print('Sell: ', current_price)
                     has_position = False
             else:
-                if current_price >= sma_50 and macd > signal and macd < 0 and rsi < 65:
+                if current_price >= sma_50 and macd > signal and rsi < 70:
                     print('Buy: ', current_price)
                     has_position = True
 
@@ -190,16 +190,16 @@ def main():
     print(strategy.get_sma('AAPL', timeperiod=20))
 
     """ Testing Stage """
-    # backtesting_start = dt.datetime(2020, 1, 1)
-    # backtesting_end = dt.datetime(2020, 12, 31)
-    # strategy.backtest(
-    #     YahooDataBacktesting,
-    #     backtesting_start,
-    #     backtesting_end,
-    #     parameters= {
-    #         "symbol": "SPY"
-    #     },
-    # )
+    backtesting_start = dt.datetime(2020, 1, 1)
+    backtesting_end = dt.datetime(2020, 12, 31)
+    strategy.backtest(
+        YahooDataBacktesting,
+        backtesting_start,
+        backtesting_end,
+        parameters= {
+            "symbol": "AAPL",
+        },
+    )
 
     """ Run Strategy Live """
     # trader.add_strategy(strategy)

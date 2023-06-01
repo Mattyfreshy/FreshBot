@@ -41,6 +41,22 @@ def marketStatus():
     time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
     return weekday and time
 
+def calculate_profit(txt):
+    """ 
+    Calculate profit from txt file
+    Returns: profit
+    """
+    with open(txt, 'r') as f:
+        profit = 0
+        for line in f:
+            if line.strip():
+                line_split = line.split()
+                if 'Buy' in line:
+                    profit -= float(line_split[-1])
+                elif 'Sell' in line:
+                    profit += float(line_split[-1])
+        return profit
+
 """ Technical Indicator Functions """
 
 def read_tickers(file) -> list:
@@ -67,7 +83,7 @@ def get_sma(df, *, timeperiod=50):
     Returns: SMA
     """
     # Get stock close data
-    df_sum = sum(df['Close'][-timeperiod:])
+    # df_sum = sum(df['Close'][-timeperiod:])
     # return df_sum/n
     return ta.SMA(df['Close'], timeperiod=timeperiod)[-1:]
 
@@ -140,10 +156,61 @@ def get_stock_data(stock,interval):
       
         return df
 
-""" Main """
+""" Trading Strategies """
 
-def main():
-    """ Testing Stage """
+def day_trading():
+    """ Day Trading """
+    debug = True
+    has_position = False
+
+    ticker = read_tickers(txt.TICKERS_EQUITY)
+
+    market_open = marketStatus()
+    while market_open:
+        df = get_stock_data(ticker[0],'5m')
+
+        # Technical indicators
+        current_price = df['Close'][-1:].tolist()[0]
+        sma_20 = get_sma(df, timeperiod=20).tolist()[0]
+        sma_50 = get_sma(df, timeperiod=50).tolist()[0]
+        rsi = get_rsi(df).tolist()[0]
+        macd_tuple = get_macd(df)
+        macd = macd_tuple[0].tolist()[0]
+        signal = macd_tuple[1].tolist()[0]
+
+        if debug:
+            print(get_time_now_format('12'))
+            print('Position: ', has_position)
+            print('Current Price: ', current_price)
+            print('SMA_20: ', sma_20)
+            print('SMA_50: ', sma_50)
+            print('RSI: ', rsi)
+            print('MACD: ', macd)
+            print('Signal: ', signal)
+
+        if has_position:
+            if current_price <= sma_20 and macd < signal and rsi > 30:
+                with open(txt.TRADES, 'a') as f:
+                    f.write(f'{get_time_now_format("12")}: Sell {ticker[0]} @ {round(current_price,2)}\n')
+                print('Sell: ', current_price)
+                has_position = False
+        else:
+            if current_price >= sma_50 and macd > signal and rsi < 70:
+                with open(txt.TRADES, 'a') as f:
+                    f.write(f'{get_time_now_format("12")}: Buy {ticker[0]} @ {round(current_price,2)}\n')
+                print('Buy: ', current_price)
+                has_position = True
+
+        # Delay between each iteration
+        time.sleep(10)    # n second delay
+        # Get market status
+        market_open = marketStatus()
+
+    print('Stock Market Closed')
+
+
+def weekly_trading():
+    """ Week Trading """
     debug = True
     has_position = False
 
@@ -191,6 +258,20 @@ def main():
         market_open = marketStatus()
 
     print('Stock Market Closed')
+
+
+""" Main """
+
+def main():
+    """ Testing Stage """
+    is_day_trading = True
+
+    if is_day_trading:
+        day_trading()
+    else:
+        weekly_trading()
+    
+    print(calculate_profit(txt.TRADES))
 
     return    
 
