@@ -4,6 +4,8 @@ import datetime as dt
 import txt_dir as txt
 import asyncio
 import time
+import matplotlib.pyplot as plt
+
 
 import talib as ta
 
@@ -184,7 +186,7 @@ def main():
                 has_position = True
 
         # Delay between each iteration
-        time.sleep(60)    # n second delay
+        time.sleep(5)    # n second delay
         # Get market status
         market_open = marketStatus()
 
