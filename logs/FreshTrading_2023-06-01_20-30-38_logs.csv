@@ -1,4 +1,0 @@
-2023-06-01 20:30:38,824: root: INFO: FreshTrading : Executing the initialize lifecycle method
-2023-06-01 20:30:38,827: backtest_stats: INFO: Backtest took 0:00:00.005832 for a speed of 0.000
-2023-06-01 20:30:38,827: root: WARNING: Cannot plot returns because the strategy returns are missing
-2023-06-01 20:30:38,827: root: WARNING: Cannot create a tearsheet because the strategy returns are missing
