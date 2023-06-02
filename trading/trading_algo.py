@@ -39,7 +39,7 @@ class FreshTrading(Strategy):
         time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
         return weekday and time
 
-    def read_tickers(file) -> list:
+    def read_tickers(self, file) -> list:
         """ Read tickers from file and return list of tickers as strings """
         with open(file, 'r') as f:
             lst = []
@@ -57,7 +57,7 @@ class FreshTrading(Strategy):
             - Use 1m interval data for day trading.
             - Use 10m interval data for weekly trading.
         
-        Returns: SMA
+        Returns: float value
         """
         return ta.SMA(df['close'], timeperiod=timeperiod).tolist()[-1]
 
@@ -77,7 +77,7 @@ class FreshTrading(Strategy):
                     Average Gain = [(previous Average Gain) x 13 + current Gain] / 14
                     Average Loss = [(previous Average Loss) x 13 + current Loss] / 14
         
-        Returns: RSI
+        Returns: float value
         """
         return ta.RSI(df['close'], timeperiod=timeperiod).tolist()[-1]
 
@@ -112,6 +112,8 @@ class FreshTrading(Strategy):
                 Time interval of historical prices
                 - 'minute'
                 - 'day'
+
+        Returns: DataFrame
         """
         historical_prices = self.get_historical_prices(
             asset=asset,
@@ -148,25 +150,29 @@ class FreshTrading(Strategy):
         # Backtesting
         backtesting = True
         debug = False
+        ticker = 'AAPL'
 
         # Get stock data
-        stocks = self.read_tickers(txt.TICKERS_EQUITY)
+        # stocks = self.read_tickers(txt.TICKERS_EQUITY)
 
         if self.marketStatus() or backtesting:
             # Buy status variable
-            has_position = False
+            has_position = self.get_position(ticker)
 
             # Get stock data
-            df = self.get_stock_data(asset='AAPL', length=100, timestep='day')
+            df = self.get_stock_data(asset=ticker, length=100, timestep='day')
 
             # Technical indicators
-            current_price = df['close'].tolist()[-1]
-            sma_20 = self.get_sma(df, timeperiod=20).tolist()[0]
-            sma_50 = self.get_sma(df, timeperiod=50).tolist()[0]
-            rsi = self.get_rsi(df).tolist()[0]
+            # current_price = df['close'].tolist()[-1]
+            current_price = self.get_last_price(ticker)
+            sma_20 = self.get_sma(df, timeperiod=20)
+            sma_50 = self.get_sma(df, timeperiod=50)
+            rsi = self.get_rsi(df)
             macd_tuple = self.get_macd(df)
-            macd = macd_tuple[0].tolist()[0]
-            signal = macd_tuple[1].tolist()[0]
+            macd = macd_tuple[0]
+            signal = macd_tuple[1]
+
+            quantity = self.portfolio_value // current_price
 
             if debug:
                 print(dt.datetime.now())
@@ -179,12 +185,12 @@ class FreshTrading(Strategy):
 
             if has_position:
                 if current_price <= sma_20 and macd < signal and rsi > 30:
-                    print('Sell: ', current_price)
-                    has_position = False
+                    order = self.create_order(ticker, quantity, 'sell')   
+                    self.submit_order(order)                 
             else:
                 if current_price >= sma_50 and macd > signal and rsi < 70:
-                    print('Buy: ', current_price)
-                    has_position = True
+                    order = self.create_order(ticker, quantity, 'buy')
+                    self.submit_order(order)
 
         return
 
@@ -195,7 +201,8 @@ def main():
     broker = Alpaca(ALPACA_CONFIG)
     strategy = FreshTrading(name='FreshStrategy', broker=broker)
 
-    print(strategy.get_sma('AAPL', timeperiod=20))
+    # df = strategy.get_stock_data(asset='AAPL', length=100, timestep='minute')
+    # print(strategy.get_sma(df, timeperiod=20))
 
     """ Testing Stage """
     backtesting_start = dt.datetime(2020, 1, 1)
@@ -204,9 +211,6 @@ def main():
         YahooDataBacktesting,
         backtesting_start,
         backtesting_end,
-        parameters= {
-            "symbol": "AAPL",
-        },
     )
 
     """ Run Strategy Live """
