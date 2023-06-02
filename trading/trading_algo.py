@@ -9,7 +9,7 @@ from config import ALPACA_CONFIG
 
 from lumibot.backtesting import YahooDataBacktesting
 from lumibot.brokers import Alpaca
-from lumibot.entities import Asset, TradingFee
+from lumibot.entities import Asset
 from lumibot.strategies.strategy import Strategy
 from lumibot.traders import Trader
 import talib as ta
@@ -33,8 +33,9 @@ class FreshTrading(Strategy):
     """ lumibot library strategy class """
 
     def initialize(self):
-        self.sleeptime = '10s'  # loop sleep time
+        self.sleeptime = '30m'  # loop sleep time
         self.tickers = self.read_tickers(txt.TICKERS_EQUITY)
+        self.model = joblib.load(txt.AAPL_MODEL)
 
     def marketStatus(self): 
         """ Returns True if market is open, False if market is closed """
@@ -113,8 +114,8 @@ class FreshTrading(Strategy):
                 Number of days to get historical prices for
             timestep: str
                 Time interval of historical prices
-                - 'minute'
-                - 'day'
+                    - 'minute'
+                    - 'day'
 
         Returns: DataFrame
         """
@@ -128,7 +129,10 @@ class FreshTrading(Strategy):
         return df
 
     def on_trading_iteration(self):
+        # Unsuccessful
         # self.FreshStrategy()
+        
+        # Successful so far
         self.MLStrategy()
 
     """ Trading Algorithms """
@@ -150,8 +154,6 @@ class FreshTrading(Strategy):
             - Stock price <= SMA(20)
             - MACD crosses below signal line
             - RSI > 35
-
-        *NOTE*: UNSUCCESSFUL
         """
         # Backtesting
         backtesting = True
@@ -162,13 +164,8 @@ class FreshTrading(Strategy):
         # stocks = self.read_tickers(txt.TICKERS_EQUITY)
 
         if self.marketStatus() or backtesting:
-            # Buy status variable
-            position = self.get_position(ticker)
-            has_position = position and position.quantity > 0
-            quantity = self.portfolio_value // current_price
-
             # Get stock data
-            df = self.get_stock_data(asset=ticker, length=100, timestep='day')
+            df = self.get_stock_data(asset=ticker, length=70, timestep='day')
 
             # Technical indicators
             current_price = self.get_last_price(ticker)
@@ -178,6 +175,11 @@ class FreshTrading(Strategy):
             macd_tuple = self.get_macd(df)
             macd = macd_tuple[0]
             signal = macd_tuple[1]
+
+            # Positional variable
+            position = self.get_position(ticker)
+            has_position = position and position.quantity > 0
+            quantity = self.portfolio_value // current_price
 
             if debug:
                 print(dt.datetime.now())
@@ -203,7 +205,7 @@ class FreshTrading(Strategy):
         ticker = 'AAPL'
 
         # Get stock data
-        df = self.get_stock_data(asset=ticker, length=100, timestep='day')
+        df = self.get_stock_data(asset=ticker, length=70, timestep='day')
 
         # Technical indicators
         current_price = self.get_last_price(ticker)
@@ -220,7 +222,7 @@ class FreshTrading(Strategy):
         quantity = self.portfolio_value // current_price
 
         # Load the trained machine learning model
-        model = joblib.load('models/AAPL_model.joblib')
+        model = self.model
 
         # Separate the features (SMA, RSI, MACD) and labels
         latest_df = pd.DataFrame({'SMA_20': sma_20, 'SMA_50': sma_50, 'RSI': rsi, 'MACD': macd, 'Signal': signal}, index=[df.index[-1]]).fillna(0)  # Fill missing values with 0
@@ -250,7 +252,7 @@ def main():
 
     """ Testing Stage """
     backtesting_start = dt.datetime(2020, 1, 1)
-    backtesting_end = dt.datetime(2021, 12, 31)
+    backtesting_end = dt.datetime(2020, 12, 31)
     strategy.backtest(
         YahooDataBacktesting,
         backtesting_start,

@@ -4,6 +4,7 @@ import datetime as dt
 import txt_dir as txt
 import numpy as np
 import talib as ta
+import time
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
@@ -196,6 +197,7 @@ def train_model(ticker: str, interval: str):
     print('Accuracy:', accuracy)
 
     # Save the trained model to a file
+    time.sleep(1)
     joblib.dump(model, 'trading/models/AAPL_model.joblib')
 
     pass

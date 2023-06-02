@@ -4,10 +4,12 @@ import os
 
 # Text file Directories/Filepaths
 cwd = os.getcwd()
-DIR = 'trading/txt/'
-TICKERS_EQUITY = DIR + 'tickersEquity.txt'
-TICKERS_ETF = DIR + 'tickersETF.txt'
-TRADES = DIR + 'trades.txt'
+TXT_DIR = 'trading/txt/'
+ML_DIR = 'trading/models/'
+TICKERS_EQUITY = TXT_DIR + 'tickersEquity.txt'
+TICKERS_ETF = TXT_DIR + 'tickersETF.txt'
+TRADES = TXT_DIR + 'trades.txt'
+AAPL_MODEL = ML_DIR + 'AAPL_model.joblib'
 
 def main():
     return
