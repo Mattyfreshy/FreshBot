@@ -30,7 +30,7 @@ class FreshTrading(Strategy):
     """ lumibot library strategy class """
 
     def initialize(self):
-        self.sleeptime = 1  # minutes
+        self.sleeptime = '10s'  # loop sleep time
         self.tickers = self.read_tickers(txt.TICKERS_EQUITY)
 
     def marketStatus(self): 
@@ -157,7 +157,8 @@ class FreshTrading(Strategy):
 
         if self.marketStatus() or backtesting:
             # Buy status variable
-            has_position = self.get_position(ticker)
+            position = self.get_position(ticker)
+            has_position = position and position.quantity > 0
 
             # Get stock data
             df = self.get_stock_data(asset=ticker, length=100, timestep='day')
@@ -206,11 +207,15 @@ def main():
 
     """ Testing Stage """
     backtesting_start = dt.datetime(2020, 1, 1)
-    backtesting_end = dt.datetime(2020, 12, 31)
+    backtesting_end = dt.datetime(2021, 12, 31)
     strategy.backtest(
         YahooDataBacktesting,
         backtesting_start,
         backtesting_end,
+        benchmark_asset='AAPL',
+        parameters={
+            'ticker': 'AAPL',
+        },
     )
 
     """ Run Strategy Live """
