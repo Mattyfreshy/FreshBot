@@ -13,6 +13,9 @@ from lumibot.entities import Asset, TradingFee
 from lumibot.strategies.strategy import Strategy
 from lumibot.traders import Trader
 import talib as ta
+import pandas as pd
+
+import joblib
 
 
 # Load environment variables
@@ -125,9 +128,10 @@ class FreshTrading(Strategy):
         return df
 
     def on_trading_iteration(self):
-        self.FreshStrategy()
+        # self.FreshStrategy()
+        self.MLStrategy()
 
-    """ Main Trading Algorithm """
+    """ Trading Algorithms """
 
     def FreshStrategy(self):
         """ 
@@ -146,6 +150,8 @@ class FreshTrading(Strategy):
             - Stock price <= SMA(20)
             - MACD crosses below signal line
             - RSI > 35
+
+        *NOTE*: UNSUCCESSFUL
         """
         # Backtesting
         backtesting = True
@@ -159,12 +165,12 @@ class FreshTrading(Strategy):
             # Buy status variable
             position = self.get_position(ticker)
             has_position = position and position.quantity > 0
+            quantity = self.portfolio_value // current_price
 
             # Get stock data
             df = self.get_stock_data(asset=ticker, length=100, timestep='day')
 
             # Technical indicators
-            # current_price = df['close'].tolist()[-1]
             current_price = self.get_last_price(ticker)
             sma_20 = self.get_sma(df, timeperiod=20)
             sma_50 = self.get_sma(df, timeperiod=50)
@@ -172,8 +178,6 @@ class FreshTrading(Strategy):
             macd_tuple = self.get_macd(df)
             macd = macd_tuple[0]
             signal = macd_tuple[1]
-
-            quantity = self.portfolio_value // current_price
 
             if debug:
                 print(dt.datetime.now())
@@ -194,6 +198,45 @@ class FreshTrading(Strategy):
                     self.submit_order(order)
 
         return
+    
+    def MLStrategy(self):
+        ticker = 'AAPL'
+
+        # Get stock data
+        df = self.get_stock_data(asset=ticker, length=100, timestep='day')
+
+        # Technical indicators
+        current_price = self.get_last_price(ticker)
+        sma_20 = self.get_sma(df, timeperiod=20)
+        sma_50 = self.get_sma(df, timeperiod=50)
+        rsi = self.get_rsi(df)
+        macd_tuple = self.get_macd(df)
+        macd = macd_tuple[0]
+        signal = macd_tuple[1]
+
+        # Positional variable
+        position = self.get_position(ticker)
+        has_position = position and position.quantity > 0
+        quantity = self.portfolio_value // current_price
+
+        # Load the trained machine learning model
+        model = joblib.load('models/AAPL_model.joblib')
+
+        # Separate the features (SMA, RSI, MACD) and labels
+        latest_df = pd.DataFrame({'SMA_20': sma_20, 'SMA_50': sma_50, 'RSI': rsi, 'MACD': macd, 'Signal': signal}, index=[df.index[-1]]).fillna(0)  # Fill missing values with 0
+
+        predictions = model.predict(latest_df)
+
+        if predictions[0] == 1:
+            # Place a buy order
+            if not has_position:
+                order = self.create_order(ticker, quantity, 'buy')
+                self.submit_order(order)
+        else:
+            # Place a sell order
+            if has_position:
+                order = self.create_order(ticker, quantity, 'sell')
+                self.submit_order(order)
 
 """ Main """
 
