@@ -252,14 +252,14 @@ def main():
 
     """ Testing Stage """
     backtesting_start = dt.datetime(2020, 1, 1)
-    backtesting_end = dt.datetime(2020, 12, 31)
+    backtesting_end = dt.datetime(2022, 12, 31)
     strategy.backtest(
         YahooDataBacktesting,
         backtesting_start,
         backtesting_end,
-        benchmark_asset='AAPL',
+        benchmark_asset='SPY',
         parameters={
-            'ticker': 'AAPL',
+            'ticker': 'SPY',
         },
     )
 

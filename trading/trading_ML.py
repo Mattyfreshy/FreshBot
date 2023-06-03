@@ -207,7 +207,7 @@ def train_model(ticker: str, interval: str):
 def main():
     """ Testing Stage """
     
-    train_model('AAPL', '1m')
+    train_model('AAPL', '15m')
 
     return    
 
