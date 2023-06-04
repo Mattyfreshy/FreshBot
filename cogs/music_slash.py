@@ -115,6 +115,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         header = f"**{'Playlist' if 'playlist?list=' in url else 'Song'} Queued - **{cls.discord_requester(interaction=interaction)}"
         vol = player.volume
         embed = await cls.create_embed(url=url, info=data, header=header, vol=vol)
+        embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar_url)
         await interaction.response.send_message(embed=embed)
 
         # Due to dict formatting, we need get entries from playlist
