@@ -429,16 +429,17 @@ class Music(commands.Cog):
 
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
-        vc.stop()
-        queue = self.get_player(interaction=interaction).queue
-        if not queue.empty():
-            requester = YTDLSource.discord_requester(interaction=interaction)
-            await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
-            for i in range(count):
+        
+        for i in range(count):
+            vc.stop()
+            queue = self.get_player(interaction=interaction).queue
+            if not queue.empty():
+                requester = YTDLSource.discord_requester(interaction=interaction)
+                if i == 0:
+                    await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
                 await queue.get()
-                await asyncio.sleep(0.1)
-        else:
-            await interaction.response.send_message('There is no next song on the waiting list.')
+            else:
+                await interaction.response.send_message('There is no next song on the waiting list.')
 
     @app_commands.command(name='clear')
     async def clear_(self, interaction: discord.Interaction):
