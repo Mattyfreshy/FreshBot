@@ -422,15 +422,15 @@ class Music(commands.Cog):
     @app_commands.command(name='skip')
     async def skip_(self, interaction: discord.Interaction, *, count: int=1):
         """Skip the song. If a number is specified, skip that many songs."""
-        vc = interaction.guild.voice_client
-
-        if not vc or not vc.is_connected():
-            return await interaction.response.send_message('I am currently not in a channel!', delete_after=20)
-
-        if not vc.is_playing():
-            return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
-        
         for i in range(count):
+            vc = interaction.guild.voice_client
+
+            if not vc or not vc.is_connected():
+                return await interaction.response.send_message('I am currently not in a channel!', delete_after=20)
+
+            if not vc.is_playing():
+                return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
+        
             vc.stop()
             queue = self.get_player(interaction=interaction).queue
             if not queue.empty():
