@@ -3,7 +3,7 @@ import yfinance as yf
 import pandas_datareader.data as web
 import pandas as pd
 import datetime as dt
-import txt_dir as txt
+import trading.txt_dir as txt
 
 """ 
 Module of functions for obtaining stock data and returning them 
