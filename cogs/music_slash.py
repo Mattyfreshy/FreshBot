@@ -187,10 +187,10 @@ class MusicPlayer():
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(60 * 3):  # 3 minutes...
-                    # try: # bypass the Task exception was never retrieved error
-                    source = await self.queue.get()
-                    # except:
-                    #     pass
+                    try: # bypass the Task exception was never retrieved error
+                        source = await self.queue.get()
+                    except:
+                        pass
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
