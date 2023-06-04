@@ -1,4 +1,4 @@
-import os, discord, asyncio
+import sys, os, discord, asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 import trading.trading as td
@@ -118,7 +118,10 @@ def run_discord_bot():
         
         # Bot Running
         print(get_time_format(12))
-        print(f'{bot.user} is now running!\n\n')
+        print(f'{bot.user} is now running!')
+        print('Python ', sys.version)
+        print('Discord.py ', discord.__version__)
+        print('------------------\n')
 
         # Get all 'stock-trading' channels
         channels = []
