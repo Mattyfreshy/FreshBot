@@ -432,7 +432,7 @@ class Music(commands.Cog):
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
-        for _ in range(count - 1):
+        for _ in range(count):
             vc.stop()
             queue = self.get_player(interaction=interaction).queue
             if not queue.empty():
@@ -473,9 +473,16 @@ class Music(commands.Cog):
 
         # Grab up to 5 entries from the queue...
         upcoming = list(itertools.islice(player.queue._queue, 0, 10))
-
+        
+        # Embed
+        embed = discord.Embed(title='Queue', description='')
+        # Now playing field
+        title = vc.source.data.get('title', None)
+        embed.add_field(name='Now Playing:', value=title)
+        # Upcoming field
         fmt = '\n'.join(f'- {_["title"]}' for _ in upcoming)
-        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
+        embed.add_field(name=f'Upcoming - Next {len(upcoming)}', value=fmt)
+        # Set author
         embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
 
         await interaction.response.send_message(embed=embed)
