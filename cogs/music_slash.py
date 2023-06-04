@@ -135,7 +135,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             return audio_sources
         else:
             for song in data:
-                source_entries.append(**song, **{'webpage_url': song['url' if is_playlist else 'webpage_url'], 'requester': cls.discord_requester(interaction=interaction)})
+                source_entries.append(song | {'webpage_url': song['url' if is_playlist else 'webpage_url'], 'requester': cls.discord_requester(interaction=interaction)})
         return source_entries
 
     @classmethod
