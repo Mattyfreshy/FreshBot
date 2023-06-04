@@ -431,8 +431,9 @@ class Music(commands.Cog):
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
+        vc.stop()       
         for i in range(count):
-            vc.stop()
+
             queue = self.get_player(interaction=interaction).queue
             if not queue.empty():
                 requester = YTDLSource.discord_requester(interaction=interaction)
