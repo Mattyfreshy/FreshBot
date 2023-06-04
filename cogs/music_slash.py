@@ -475,11 +475,11 @@ class Music(commands.Cog):
         upcoming = list(itertools.islice(player.queue._queue, 0, 10))
         
         # Embed
-        header = '**Now Playing**'
+        header = '**__Now Playing__**'
         embed = await YTDLSource.create_embed(interaction=interaction, url=vc.source.web_url, info=vc.source.data, header=header, vol=player.volume)
         # Upcoming field
         fmt = '\n'.join(f'- {_["title"]}' for _ in upcoming)
-        embed.add_field(name=f'Upcoming - Next {len(upcoming)}', value=fmt, inline=False)
+        embed.add_field(name=f'__Upcoming - Next {len(upcoming)}__', value=fmt, inline=False)
         # Set author
         embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
 
