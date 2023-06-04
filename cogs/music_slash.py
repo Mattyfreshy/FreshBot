@@ -436,7 +436,7 @@ class Music(commands.Cog):
         if not queue.empty():
             requester = YTDLSource.discord_requester(interaction=interaction)
             await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
-            for _ in range(count):
+            for _ in range(count - 1):
                 await queue.get()
             queue.task_done()
         else:
