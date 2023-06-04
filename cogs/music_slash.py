@@ -69,7 +69,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         mention = interaction.user.mention
         return f'{mention}'
 
-    async def create_embed(url, info, header, vol):
+    async def create_embed(interaction: discord.Interaction, url, info, header, vol):
         """Creates an embed for the current song"""
         is_playlist = 'playlist?list=' in url
         title = info.get('title', None)
@@ -80,6 +80,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             thumbnail = thumbnail[0]['url']
         
         embed = discord.Embed(description=header, color=1412061)
+        embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
         embed.set_thumbnail(url=thumbnail)
         embed.add_field(name='', value=f"[{title}]({url})", inline=False)
 
@@ -114,8 +115,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         is_playlist = 'playlist?list=' in url
         header = f"**{'Playlist' if 'playlist?list=' in url else 'Song'} Queued - **{cls.discord_requester(interaction=interaction)}"
         vol = player.volume
-        embed = await cls.create_embed(url=url, info=data, header=header, vol=vol)
-        embed.set_author(name={cls.discord_requester(interaction=interaction)}, icon_url=interaction.user.avatar)
+        embed = await cls.create_embed(interaction=interaction, url=url, info=data, header=header, vol=vol)
         await interaction.response.send_message(embed=embed)
 
         # Due to dict formatting, we need get entries from playlist
@@ -492,7 +492,7 @@ class Music(commands.Cog):
 
         header = f'**Now Playing** - {vc.source.requester}'
         vol = player.volume
-        embed = await YTDLSource.create_embed(url=vc.source.web_url, info=vc.source.data, header=header, vol=vol)
+        embed = await YTDLSource.create_embed(interaction=interaction, url=vc.source.web_url, info=vc.source.data, header=header, vol=vol)
         player.np = await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='volume')
