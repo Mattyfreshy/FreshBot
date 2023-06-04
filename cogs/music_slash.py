@@ -420,8 +420,8 @@ class Music(commands.Cog):
         await interaction.response.send_message(f'**{vc.source.requester}**: Resumed the song!')
 
     @app_commands.command(name='skip')
-    async def skip_(self, interaction: discord.Interaction):
-        """Skip the song."""
+    async def skip_(self, interaction: discord.Interaction, *, count: int=1):
+        """Skip the song. If a number is specified, skip that many songs."""
         vc = interaction.guild.voice_client
 
         if not vc or not vc.is_connected():
@@ -433,8 +433,9 @@ class Music(commands.Cog):
         queue = self.get_player(interaction=interaction).queue
         if not queue.empty():
             requester = YTDLSource.discord_requester(interaction=interaction)
-            await interaction.response.send_message(f'**{requester}**: Skipped the song!')
-            await queue.get()
+            await interaction.response.send_message(f'**{requester}**: Skipped {count} song!')
+            for i in range(count):
+                await queue.get()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')
 
