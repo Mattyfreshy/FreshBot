@@ -431,8 +431,9 @@ class Music(commands.Cog):
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
-        # Skip n count of songs
         queue = self.get_player(interaction=interaction).queue
+        
+        # Skip n count of songs
         for _ in range(count-1):
             await queue.get()
         
