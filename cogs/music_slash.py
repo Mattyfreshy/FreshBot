@@ -439,7 +439,7 @@ class Music(commands.Cog):
             await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
             # await queue.get() # Sometimes removes a song from the queue
             queue.task_done()
-            for _ in range(count):
+            for _ in range(count-1):
                 await queue.get()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')
