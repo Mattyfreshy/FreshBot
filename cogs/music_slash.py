@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord.ui import Button, View, button
-import FreshBot as fb
 import json
 
 import asyncio
@@ -432,16 +431,15 @@ class Music(commands.Cog):
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
-        for _ in range(count):
-            vc.stop()
-            queue = self.get_player(interaction=interaction).queue
-            if not queue.empty():
-                requester = YTDLSource.discord_requester(interaction=interaction)
-                await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
-                
-                await queue.get()
-            else:
-                await interaction.response.send_message('There is no next song on the waiting list.')
+        # for _ in range(count):
+        vc.stop()
+        queue = self.get_player(interaction=interaction).queue
+        if not queue.empty():
+            requester = YTDLSource.discord_requester(interaction=interaction)
+            await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
+            await queue.get()
+        else:
+            await interaction.response.send_message('There is no next song on the waiting list.')
 
     @app_commands.command(name='clear')
     async def clear_(self, interaction: discord.Interaction):
@@ -472,7 +470,7 @@ class Music(commands.Cog):
             return await interaction.response.send_message('There are currently no queued songs.')
 
         # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
+        upcoming = list(itertools.islice(player.queue._queue, 0, 5))
         
         # Embed
         header = '**__Now Playing__**'
