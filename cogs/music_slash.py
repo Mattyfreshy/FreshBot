@@ -431,7 +431,9 @@ class Music(commands.Cog):
         if not vc.is_playing():
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
-        # 
+        for _ in range(count-1):
+            await queue.get()
+        
         vc.stop()
         queue = self.get_player(interaction=interaction).queue
         if not queue.empty():
@@ -439,8 +441,6 @@ class Music(commands.Cog):
             await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
             # await queue.get() # Sometimes removes a song from the queue
             queue.task_done()
-            for _ in range(count-1):
-                await queue.get()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')
 
