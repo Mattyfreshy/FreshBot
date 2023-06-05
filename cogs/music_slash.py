@@ -437,7 +437,7 @@ class Music(commands.Cog):
         if not queue.empty():
             requester = YTDLSource.discord_requester(interaction=interaction)
             await interaction.response.send_message(f'**{requester}**: Skipped {count} song(s)!')
-            await queue.get()
+            queue.task_done()
         else:
             await interaction.response.send_message('There is no next song on the waiting list.')
 
@@ -459,7 +459,7 @@ class Music(commands.Cog):
 
     @app_commands.command(name='queue')
     async def queue_info(self, interaction: discord.Interaction):
-        """Retrieve a basic queue of upcoming songs."""
+        """Retrieve currently playing and a basic queue of upcoming songs."""
         vc = interaction.guild.voice_client
 
         if not vc or not vc.is_connected():
