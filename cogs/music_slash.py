@@ -432,7 +432,7 @@ class Music(commands.Cog):
             return await interaction.response.send_message('I am not currently playing anything!', delete_after=20)
         
         for _ in range(count-1):
-            await queue.get()
+            await self.get_player(interaction=interaction).queue.get()
         
         vc.stop()
         queue = self.get_player(interaction=interaction).queue
