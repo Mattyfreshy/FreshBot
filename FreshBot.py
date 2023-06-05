@@ -103,6 +103,9 @@ def run_discord_bot():
     # On ready
     @bot.event
     async def on_ready():
+        # Clear terminal screen
+        os.system('cls' if os.name == 'nt' else 'clear')
+        
         # Load extensions
         await load()
 
