@@ -85,7 +85,7 @@ async def get_quote(channels, enabled):
 def run_discord_bot():
     """ Run discord bot """
 
-    intents = discord.Intents.default()
+    intents = discord.Intents.all()
     intents.message_content = True
     intents.voice_states = True
     help_command = commands.DefaultHelpCommand(no_category='Help')
