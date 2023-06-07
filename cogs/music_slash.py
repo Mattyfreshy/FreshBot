@@ -172,7 +172,7 @@ class MusicPlayer():
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
-        self.volume = 0.75
+        self.volume = 1.0
         self.current = None
 
         interaction.client.loop.create_task(self.player_loop())
