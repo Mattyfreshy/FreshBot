@@ -3,15 +3,15 @@
 - Current implementation is in FreshBot.py and is a work in progress.  
 - User commands are in commands.py.  
 - ChatGPT in chatGPT.py is a chatBot that is semi functional.  
-- music.py is sourced and has modified parts.  
+- music.py is sourced from here: https://gist.github.com/EvieePy/ab667b74e9758433b3eb806c53a19f34 however it has been heavily modified.
 
 ## Key Features
-- All 'stock-trading' channels that the bot has access to will be updated with the current price of the stock set.  
-- Working on trading algorithms.  
+- All 'stock-trading' channels that the bot has access to will be updated with the current price of the stock set if enabled.  
+- Can play youtube videos and playlists. Also can search for songs.  
+- Has chatting features utlizing chatGPT API.
 
 ## Updates
-- Code has been converted from using discord.client to discord.bot for better command functionality.  
-- Working on implementing interactions.  
+- Code has been converted from discord.client -> discord.bot -> discord.bot Interactions for better command functionality.  
 - responses.py is now redundant, but there for legacy reasons.  
 
 ## Requirements
