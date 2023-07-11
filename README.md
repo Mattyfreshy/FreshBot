@@ -1,4 +1,4 @@
-### FreshBot
+# FreshBot
 
 - Current implementation is in FreshBot.py and is a work in progress.  
 - User commands are in commands.py.  
