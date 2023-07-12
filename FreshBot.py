@@ -8,6 +8,7 @@ import speech_recognition as sr
 import pydub
 from pydub.playback import play
 from pydub.utils import make_chunks
+from pydub import AudioSegment
 
 
 # Load environment variables
@@ -181,9 +182,29 @@ def run_discord_bot():
 
             if voice_client is not None and not voice_client.is_playing():
                 audio_source = voice_client.listen()
-                chunks = make_chunks(audio_source.frames, 1024)  # Split audio into chunks
-                for chunk in chunks:
-                    process_audio_chunk(chunk)
+
+                # Save audio to a file
+                audio_file = "audio.wav"
+                audio_source.save(audio_file)
+
+                # Load audio file using pydub
+                audio = AudioSegment.from_wav(audio_file)
+
+                # Process audio using SpeechRecognition
+                with sr.AudioFile(audio_file) as source:
+                    audio = r.record(source)
+                    try:
+                        text = r.recognize_google(audio)
+                        print(f"You said: {text}")
+                    except sr.UnknownValueError:
+                        print("Speech recognition could not understand audio")
+                    except sr.RequestError as e:
+                        print(f"Could not request results from Google Speech Recognition service; {e}")
+
+                # Cleanup
+                voice_client.stop()
+                await voice_client.disconnect()
+                audio.export(audio_file, format="wav")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
