@@ -1,4 +1,4 @@
-### FreshBot
+# FreshBot
 
 - Current implementation is in FreshBot.py and is a work in progress.  
 - User commands are in commands.py.  
@@ -8,7 +8,7 @@
 ## Key Features
 - All 'stock-trading' channels that the bot has access to will be updated with the current price of the stock set if enabled.  
 - Can play youtube videos and playlists. Also can search for songs.  
-- Has chatting features utlizing chatGPT API.
+- Has chatting features utilizing chatGPT API.
 
 ## Updates
 - Code has been converted from discord.client -> discord.bot -> discord.bot Interactions for better command functionality.  
