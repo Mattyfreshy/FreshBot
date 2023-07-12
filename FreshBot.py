@@ -4,10 +4,20 @@ from dotenv import load_dotenv
 import trading as td
 import datetime as dt
 
+import speech_recognition as sr
+import pydub
+from pydub.playback import play
+from pydub.utils import make_chunks
 
+
+# Load environment variables
 load_dotenv()
 
+# Speech Recognition
+r = sr.Recognizer()
+
 def get_prefix(client, message):
+    '''Get prefix for bot'''
     # Public triggers
     prefixes = ['!', '?', '.', '$']
     
@@ -82,6 +92,17 @@ async def get_quote(channels, enabled):
         # # await channel.send("Stock Market Closed")
         await asyncio.sleep(delay)
         
+def process_audio_chunk(chunk):
+    '''Process audio chunk'''
+    audio = sr.AudioData(chunk.raw_data, chunk.frame_rate, chunk.sample_width)
+    try:
+        text = r.recognize_google(audio)
+        print(f"You said: {text}")
+    except sr.UnknownValueError:
+        print("Speech recognition could not understand audio")
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Speech Recognition service; {e}")        
+
 def run_discord_bot():
     """ Run discord bot """
 
@@ -149,6 +170,20 @@ def run_discord_bot():
             return
         print(get_time_format(12))
         print(f"{username} said: \n'{user_message}' ({channel})\n")
+        
+    @bot.event
+    async def on_voice_state_update(self, member, before, after):
+        if after.channel is not None and after.channel != before.channel:
+            if member == self.user:
+                voice_client = await after.channel.connect()
+            else:
+                voice_client = discord.utils.get(self.voice_clients, guild=member.guild)
+
+            if voice_client is not None and not voice_client.is_playing():
+                audio_source = voice_client.listen()
+                chunks = make_chunks(audio_source.frames, 1024)  # Split audio into chunks
+                for chunk in chunks:
+                    process_audio_chunk(chunk)
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
