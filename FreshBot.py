@@ -93,16 +93,16 @@ async def get_quote(channels, enabled):
         # # await channel.send("Stock Market Closed")
         await asyncio.sleep(delay)
         
-def process_audio_chunk(chunk):
-    '''Process audio chunk'''
-    audio = sr.AudioData(chunk.raw_data, chunk.frame_rate, chunk.sample_width)
-    try:
-        text = r.recognize_google(audio)
-        print(f"You said: {text}")
-    except sr.UnknownValueError:
-        print("Speech recognition could not understand audio")
-    except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")        
+# def process_audio_chunk(chunk):
+#     '''Process audio chunk'''
+#     audio = sr.AudioData(chunk.raw_data, chunk.frame_rate, chunk.sample_width)
+#     try:
+#         text = r.recognize_google(audio)
+#         print(f"You said: {text}")
+#     except sr.UnknownValueError:
+#         print("Speech recognition could not understand audio")
+#     except sr.RequestError as e:
+#         print(f"Could not request results from Google Speech Recognition service; {e}")        
 
 def run_discord_bot():
     """ Run discord bot """
@@ -172,39 +172,39 @@ def run_discord_bot():
         print(get_time_format(12))
         print(f"{username} said: \n'{user_message}' ({channel})\n")
         
-    @bot.event
-    async def on_voice_state_update(member, before, after):
-        if after.channel is not None and after.channel != before.channel:
-            if member == bot.user:
-                voice_client = await after.channel.connect()
-            else:
-                voice_client = discord.utils.get(bot.voice_clients, guild=member.guild)
+    # @bot.event
+    # async def on_voice_state_update(member, before, after):
+    #     if after.channel is not None and after.channel != before.channel:
+    #         if member == bot.user:
+    #             voice_client = await after.channel.connect()
+    #         else:
+    #             voice_client = discord.utils.get(bot.voice_clients, guild=member.guild)
 
-            if voice_client is not None and not voice_client.is_playing():
-                audio_source = voice_client.listen()
+    #         if voice_client is not None and not voice_client.is_playing():
+    #             audio_source = voice_client.listen()
 
-                # Save audio to a file
-                audio_file = "audio.wav"
-                audio_source.save(audio_file)
+    #             # Save audio to a file
+    #             audio_file = "audio.wav"
+    #             audio_source.save(audio_file)
 
-                # Load audio file using pydub
-                audio = AudioSegment.from_wav(audio_file)
+    #             # Load audio file using pydub
+    #             audio = AudioSegment.from_wav(audio_file)
 
-                # Process audio using SpeechRecognition
-                with sr.AudioFile(audio_file) as source:
-                    audio = r.record(source)
-                    try:
-                        text = r.recognize_google(audio)
-                        print(f"You said: {text}")
-                    except sr.UnknownValueError:
-                        print("Speech recognition could not understand audio")
-                    except sr.RequestError as e:
-                        print(f"Could not request results from Google Speech Recognition service; {e}")
+    #             # Process audio using SpeechRecognition
+    #             with sr.AudioFile(audio_file) as source:
+    #                 audio = r.record(source)
+    #                 try:
+    #                     text = r.recognize_google(audio)
+    #                     print(f"You said: {text}")
+    #                 except sr.UnknownValueError:
+    #                     print("Speech recognition could not understand audio")
+    #                 except sr.RequestError as e:
+    #                     print(f"Could not request results from Google Speech Recognition service; {e}")
 
-                # Cleanup
-                voice_client.stop()
-                await voice_client.disconnect()
-                audio.export(audio_file, format="wav")
+    #             # Cleanup
+    #             voice_client.stop()
+    #             await voice_client.disconnect()
+    #             audio.export(audio_file, format="wav")
 
     # Run bot
     bot.run(os.getenv('DISCORD_TOKEN'), reconnect=True)
