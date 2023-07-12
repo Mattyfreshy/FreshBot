@@ -172,12 +172,12 @@ def run_discord_bot():
         print(f"{username} said: \n'{user_message}' ({channel})\n")
         
     @bot.event
-    async def on_voice_state_update(self, member, before, after):
+    async def on_voice_state_update(member, before, after):
         if after.channel is not None and after.channel != before.channel:
-            if member == self.user:
+            if member == bot.user:
                 voice_client = await after.channel.connect()
             else:
-                voice_client = discord.utils.get(self.voice_clients, guild=member.guild)
+                voice_client = discord.utils.get(bot.voice_clients, guild=member.guild)
 
             if voice_client is not None and not voice_client.is_playing():
                 audio_source = voice_client.listen()
