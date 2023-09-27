@@ -142,5 +142,5 @@ WTForms==3.0.1
 yarl==1.9.2
 yfinance==0.2.18
 youtube-dl==2021.12.17
-yt-dlp==2023.3.4
+yt-dlp==2023.9.24
 zipp==3.15.0
