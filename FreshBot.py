@@ -1,9 +1,9 @@
 import sys, os, discord, asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
-import trading as td
 import datetime as dt
 
+# Speech processing for Speech to Text
 import speech_recognition as sr
 import pydub
 from pydub.playback import play
@@ -41,57 +41,6 @@ def get_time_format(format):
         return dt.datetime.now().strftime("%H:%M")
     else:
         return dt.datetime.now().strftime("%m-%d-%Y %I:%M %p")
-
-async def get_quote(channels, enabled):
-    """ Send stock quote every minute """
-
-    while enabled:
-        # Variables
-        delay = 15 # seconds
-        date = "Date: " + str(dt.date.today().strftime("%m/%d/%Y"))
-        spacer = "**" + ''.join(["\*"] * (len(date) + 6)) + "**"
-        def marketStatus(): 
-            weekday = dt.date.today().weekday() <= 4
-            time = dt.time(9, 30) <= dt.datetime.now().time() <= dt.time(16, 00)
-            return weekday and time
-        # def marketStatus(): return True
-
-        # Print and send todays date
-        if marketStatus():
-            print(date)
-            response = spacer + "\n**\* " + date + " \*** \n" + spacer
-            for channel in channels:
-                await channel.send(response)
-
-        # Get quote while time is between 9:30 and 4:00
-        while marketStatus():
-            try:
-                response = "------------------\n"
-                response += "**Time: " + get_time_format(12) + "**\n"
-                response += td.get_stock_quotes()
-                response += "------------------\n"
-                for channel in channels:
-                    # Get Quote timestamp to terminal
-                    print("\nGetting quote for: " + channel.guild.name)
-                    print(dt.datetime.now().time(), "\n")
-
-                    # Send quote to channel
-                    await channel.send(response)
-                
-                # 1 * delay minutes between quotes
-                await asyncio.sleep(60 * delay) 
-
-            except Exception as e:
-                print("Error getting quote: ")
-                print(e)
-                await asyncio.sleep(1)
-            
-        # Stop quote
-        # print("Stock Market Closed")
-        # print(dt.datetime.now().time())
-        # print("\n")
-        # # await channel.send("Stock Market Closed")
-        await asyncio.sleep(delay)
         
 # def process_audio_chunk(chunk):
 #     '''Process audio chunk'''
@@ -142,20 +91,12 @@ def run_discord_bot():
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing , name="Your Mom!"))
         
         # Bot Running
+        # Debug data
         print(get_time_format(12))
         print(f'{bot.user} is now running!')
         print('Python ', sys.version)
         print('Discord.py ', discord.__version__)
         print('------------------\n')
-
-        # Get all 'stock-trading' channels
-        channels = []
-        for channel in bot.get_all_channels():
-            if channel.name == 'stock-trading':
-                channels.append(bot.get_channel(channel.id))
-        
-        # Get quotes for all channels
-        await get_quote(channels, False)
 
     # On message
     @bot.listen()
@@ -172,6 +113,7 @@ def run_discord_bot():
         print(get_time_format(12))
         print(f"{username} said: \n'{user_message}' ({channel})\n")
         
+    # On Audio Events
     # @bot.event
     # async def on_voice_state_update(member, before, after):
     #     if after.channel is not None and after.channel != before.channel:

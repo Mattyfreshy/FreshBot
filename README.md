@@ -6,7 +6,6 @@
 - music.py is sourced from here: https://gist.github.com/EvieePy/ab667b74e9758433b3eb806c53a19f34 however it has been modified due to changes in youtube metadata.
 
 ## Key Features
-- All 'stock-trading' channels that the bot has access to will be updated with the current price of the stock set if enabled.  
 - Can play youtube videos and playlists. Also can search for songs.  
 - Has chatting features utilizing chatGPT API.
 
