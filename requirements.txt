@@ -84,7 +84,7 @@ pandas-datareader==0.10.0
 pandas-market-calendars==4.1.4
 pandas-stubs==2.0.1.230501
 passlib==1.7.4
-Pillow==9.5.0
+Pillow==10.2.0
 plotly==5.14.1
 pluggy==1.0.0
 polygon==1.1.0
