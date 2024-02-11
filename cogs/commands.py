@@ -4,7 +4,6 @@ from discord import app_commands
 import asyncio
 import FreshBot as fb
 import random
-import trading as td
 
 class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
